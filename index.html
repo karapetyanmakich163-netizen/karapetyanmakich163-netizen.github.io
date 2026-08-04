@@ -1,0 +1,2182 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ՄԱՖԻԱ | Իրական ժամանակի խաղ</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2222%22%20fill%3D%22%230a0908%22/%3E%3Crect%20x%3D%223%22%20y%3D%223%22%20width%3D%2294%22%20height%3D%2294%22%20rx%3D%2220%22%20fill%3D%22none%22%20stroke%3D%22%23d4af37%22%20stroke-width%3D%223%22/%3E%3Ctext%20x%3D%2250%22%20y%3D%2270%22%20font-size%3D%2258%22%20text-anchor%3D%22middle%22%3E%F0%9F%8E%AD%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Rubik:wght@400;500;600;700&family=Noto+Serif+Armenian:wght@500;600;700;900&family=Noto+Sans+Armenian:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+<style>
+/* ============================= ROOT / THEME ============================= */
+:root{
+  --black:#0a0908;
+  --black-2:#141210;
+  --black-3:#1c1917;
+  --red:#a1121f;
+  --red-2:#c41e2e;
+  --red-glow:#ff2b3d;
+  --gold:#d4af37;
+  --gold-2:#f0d377;
+  --cream:#ece6da;
+  --grey:#8a8380;
+  --day-bg:#e9e2d0;
+  --day-panel:#fbf8f0;
+  --day-ink:#26211b;
+  --shadow-deep: 0 20px 60px rgba(0,0,0,.55);
+  --radius: 14px;
+  --ff-title:'Cinzel','Noto Serif Armenian',serif;
+  --ff-body:'Rubik','Noto Sans Armenian',sans-serif;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  font-family:var(--ff-body);
+  background:
+    radial-gradient(ellipse at 20% -10%, rgba(196,30,46,.18), transparent 45%),
+    radial-gradient(ellipse at 100% 110%, rgba(212,175,55,.10), transparent 45%),
+    var(--black);
+  color:var(--cream);
+  min-height:100vh;
+  overflow-x:hidden;
+  transition: background .8s ease, color .8s ease;
+}
+body.day-mode{
+  background:
+    radial-gradient(ellipse at 20% -10%, rgba(212,175,55,.28), transparent 50%),
+    radial-gradient(ellipse at 100% 110%, rgba(161,18,31,.12), transparent 50%),
+    var(--day-bg);
+  color:var(--day-ink);
+}
+::selection{background:var(--red); color:#fff;}
+h1,h2,h3,.title-font{font-family:var(--ff-title); letter-spacing:.03em;}
+button{font-family:var(--ff-body); cursor:pointer;}
+a{color:inherit;}
+::-webkit-scrollbar{width:8px; height:8px;}
+::-webkit-scrollbar-thumb{background:var(--gold); border-radius:8px; opacity:.5;}
+::-webkit-scrollbar-track{background:transparent;}
+
+/* ============================= LAYOUT SHELL ============================= */
+#app{min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:24px 16px 60px; position:relative;}
+.screen{display:none; width:100%; max-width:760px; animation: fadeUp .5s ease;}
+.screen.active{display:block;}
+@keyframes fadeUp{from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);}}
+
+.brand{
+  display:flex; flex-direction:column; align-items:center; gap:6px; margin: 18px 0 34px;
+}
+.brand-art{
+  width:100%; max-width:480px; height:auto; margin:0 auto 6px; display:block;
+  filter:drop-shadow(0 10px 28px rgba(0,0,0,.55));
+}
+body.day-mode .brand-art{ opacity:.92; }
+.brand .mask{font-size:44px; filter:drop-shadow(0 0 18px rgba(196,30,46,.55));}
+.brand h1{
+  font-size:clamp(28px,7vw,42px); margin:0; text-align:center;
+  background:linear-gradient(180deg, var(--gold-2), var(--gold) 55%, #9a7a1e);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  text-shadow: 0 2px 24px rgba(212,175,55,.25);
+}
+.brand .sub{color:var(--grey); font-size:13px; letter-spacing:.24em; text-transform:uppercase;}
+
+.card{
+  background:linear-gradient(180deg, var(--black-3), var(--black-2));
+  border:1px solid rgba(212,175,55,.18);
+  border-radius:var(--radius);
+  padding:26px;
+  box-shadow:var(--shadow-deep);
+  position:relative;
+  overflow:hidden;
+}
+body.day-mode .card{
+  background:linear-gradient(180deg, var(--day-panel), #f2ecdc);
+  border:1px solid rgba(161,18,31,.15);
+  box-shadow: 0 16px 40px rgba(140,110,40,.18);
+}
+.card::before{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(115deg, transparent 40%, rgba(212,175,55,.06) 50%, transparent 60%);
+}
+
+.btn{
+  border:none; border-radius:10px; padding:14px 22px; font-weight:600; font-size:15px;
+  transition:transform .15s ease, box-shadow .25s ease, filter .2s ease; letter-spacing:.01em;
+}
+.btn:active{transform:scale(.97);}
+.btn-primary{
+  background:linear-gradient(135deg, var(--red-2), var(--red) 70%);
+  color:#fff9f0; box-shadow:0 8px 24px rgba(164,20,30,.45), inset 0 1px 0 rgba(255,255,255,.15);
+}
+.btn-primary:hover{filter:brightness(1.08);}
+.btn-primary:disabled{filter:grayscale(.6) brightness(.6); cursor:not-allowed; box-shadow:none;}
+.btn-gold{
+  background:linear-gradient(135deg, var(--gold-2), var(--gold) 70%);
+  color:#241a03; box-shadow:0 8px 22px rgba(212,175,55,.32), inset 0 1px 0 rgba(255,255,255,.35);
+}
+.btn-gold:hover{filter:brightness(1.06);}
+.btn-ghost{
+  background:transparent; color:var(--cream); border:1px solid rgba(236,230,218,.3);
+}
+body.day-mode .btn-ghost{color:var(--day-ink); border:1px solid rgba(38,33,27,.3);}
+.btn-ghost:hover{background:rgba(236,230,218,.08);}
+.btn-block{width:100%;}
+.btn-row{display:flex; gap:12px; flex-wrap:wrap;}
+
+.input{
+  width:100%; padding:14px 16px; border-radius:10px; border:1px solid rgba(212,175,55,.25);
+  background:rgba(0,0,0,.35); color:var(--cream); font-size:16px; outline:none;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.input:focus{border-color:var(--gold); box-shadow:0 0 0 3px rgba(212,175,55,.15);}
+body.day-mode .input{background:#fff; color:var(--day-ink); border:1px solid rgba(161,18,31,.2);}
+label.field-label{display:block; font-size:12px; text-transform:uppercase; letter-spacing:.14em; color:var(--gold); margin-bottom:8px; font-weight:600;}
+.field{margin-bottom:18px;}
+.hint{font-size:13px; color:var(--grey); margin-top:8px; line-height:1.5;}
+
+/* ============================= LOADING ============================= */
+#loadingScreen{
+  position:fixed; inset:0; z-index:999; background:var(--black);
+  display:flex; align-items:center; justify-content:center; flex-direction:column; gap:18px;
+  transition:opacity .5s ease;
+}
+.spinner{
+  width:64px; height:64px; border-radius:50%;
+  border:3px solid rgba(212,175,55,.15); border-top-color:var(--gold);
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+#loadingScreen .lmask{font-size:40px; animation:pulseMask 1.6s ease-in-out infinite;}
+@keyframes pulseMask{0%,100%{opacity:.5; transform:scale(1);} 50%{opacity:1; transform:scale(1.12);}}
+#loadingScreen p{color:var(--grey); letter-spacing:.1em; font-size:13px; text-transform:uppercase;}
+
+/* ============================= LANDING ============================= */
+.landing-actions{display:flex; flex-direction:column; gap:16px;}
+.divider{display:flex; align-items:center; gap:12px; color:var(--grey); font-size:12px; text-transform:uppercase; letter-spacing:.16em; margin:6px 0;}
+.divider::before,.divider::after{content:""; flex:1; height:1px; background:rgba(212,175,55,.2);}
+
+/* ============================= LOBBY ============================= */
+.room-code-box{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  background:rgba(0,0,0,.3); border:1px dashed rgba(212,175,55,.4); border-radius:10px; padding:14px 18px; margin-bottom:14px;
+}
+body.day-mode .room-code-box{background:rgba(161,18,31,.06);}
+.room-code-box .code{font-family:var(--ff-title); font-size:26px; letter-spacing:.12em; color:var(--gold-2);}
+.copy-link-row{display:flex; gap:8px; margin-bottom:22px;}
+.copy-link-row .input{font-size:13px;}
+
+.player-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(130px,1fr)); gap:12px; margin:16px 0 6px;}
+.player-chip{
+  background:rgba(212,175,55,.06); border:1px solid rgba(212,175,55,.22); border-radius:10px;
+  padding:12px 10px; text-align:center; font-size:13px; font-weight:600; position:relative;
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+}
+.player-chip .av{
+  width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,var(--red-2),var(--red)); font-family:var(--ff-title); color:#fff; font-size:15px;
+}
+.player-chip.you{border-color:var(--gold); box-shadow:0 0 0 2px rgba(212,175,55,.25);}
+.player-chip.host-chip::after{content:"👑"; position:absolute; top:-8px; right:-6px; font-size:16px;}
+.player-chip.dead{opacity:.35; filter:grayscale(1);}
+.slots-label{font-size:13px; color:var(--grey); margin-top:18px; text-align:center;}
+
+/* ============================= ROLE REVEAL ============================= */
+.role-stage{display:flex; flex-direction:column; align-items:center; gap:20px; padding:30px 10px;}
+.role-card-3d{width:220px; height:300px; perspective:1200px;}
+.role-card-inner{width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform 1s cubic-bezier(.3,.8,.3,1);}
+.role-card-3d.flipped .role-card-inner{transform:rotateY(180deg);}
+.role-face{position:absolute; inset:0; backface-visibility:hidden; border-radius:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; box-shadow:var(--shadow-deep);}
+.role-face.back{
+  background:
+    repeating-linear-gradient(45deg, rgba(212,175,55,.08) 0 10px, transparent 10px 20px),
+    linear-gradient(155deg, var(--black-3), var(--black));
+  border:2px solid var(--gold);
+}
+.role-face.back .mask{font-size:64px; opacity:.85;}
+.role-face.front{
+  background:linear-gradient(160deg, var(--black-2), var(--black-3));
+  border:2px solid var(--gold-2);
+  transform:rotateY(180deg);
+  padding:16px;
+  text-align:center;
+}
+.role-face.front .icon{font-size:58px; margin-bottom:6px;}
+.role-face.front h2{margin:0; font-size:22px; color:var(--gold-2);}
+.role-face.front p{margin:0; font-size:13px; color:var(--grey); line-height:1.5;}
+.role-team-tag{margin-top:10px; font-size:11px; text-transform:uppercase; letter-spacing:.14em; padding:5px 12px; border-radius:20px;}
+.role-team-tag.black{background:rgba(0,0,0,.5); color:#ddd; border:1px solid #444;}
+.role-team-tag.red{background:rgba(196,30,46,.2); color:#ff8a95; border:1px solid rgba(196,30,46,.5);}
+
+/* ============================= NIGHT / DAY BANNERS ============================= */
+.phase-banner{
+  display:flex; align-items:center; justify-content:center; gap:12px; padding:16px; border-radius:12px; margin-bottom:20px;
+  font-family:var(--ff-title); font-size:18px; letter-spacing:.06em;
+  background:linear-gradient(135deg, rgba(196,30,46,.18), rgba(0,0,0,.3));
+  border:1px solid rgba(212,175,55,.25);
+}
+body.day-mode .phase-banner{background:linear-gradient(135deg, rgba(212,175,55,.28), rgba(255,255,255,.3));}
+.phase-banner .icon{font-size:26px;}
+#timerBadge{
+  margin-left:auto; font-family:var(--ff-body); font-weight:700; font-size:15px; background:rgba(0,0,0,.35);
+  padding:5px 12px; border-radius:20px; color:var(--gold-2); min-width:54px; text-align:center;
+}
+
+.night-sleep{display:flex; flex-direction:column; align-items:center; gap:16px; padding:50px 10px; text-align:center;}
+.moon{font-size:70px; animation:floatY 3.4s ease-in-out infinite;}
+@keyframes floatY{0%,100%{transform:translateY(0);} 50%{transform:translateY(-12px);}}
+.stars{position:absolute; inset:0; pointer-events:none; overflow:hidden;}
+.star{position:absolute; width:2px; height:2px; background:#fff; border-radius:50%; opacity:.6; animation:twinkle 2.5s ease-in-out infinite;}
+@keyframes twinkle{0%,100%{opacity:.15;} 50%{opacity:.9;}}
+
+/* ============================= TARGET LIST ============================= */
+.target-list{display:flex; flex-direction:column; gap:10px; margin:16px 0;}
+.target-row{
+  display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:10px;
+  background:rgba(255,255,255,.03); border:1px solid rgba(212,175,55,.15); transition:all .15s ease;
+}
+body.day-mode .target-row{background:rgba(0,0,0,.03);}
+.target-row.selectable{cursor:pointer;}
+.target-row.selectable:hover{background:rgba(212,175,55,.1); border-color:var(--gold);}
+.target-row.selected{background:rgba(196,30,46,.22); border-color:var(--red-glow); box-shadow:0 0 0 2px rgba(196,30,46,.3);}
+.target-row .av{width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,#555,#222); display:flex; align-items:center; justify-content:center; font-size:14px; font-family:var(--ff-title); flex-shrink:0;}
+.target-row .name{flex:1; font-weight:600; font-size:15px;}
+.target-row .vote-count{font-size:12px; color:var(--gold-2); font-weight:700; background:rgba(212,175,55,.12); padding:3px 9px; border-radius:12px;}
+
+/* ============================= LOG / LISTS ============================= */
+.section-title{font-family:var(--ff-title); font-size:15px; letter-spacing:.08em; color:var(--gold); margin:22px 0 10px; text-transform:uppercase; display:flex; align-items:center; gap:8px;}
+.log-box{
+  max-height:180px; overflow-y:auto; background:rgba(0,0,0,.3); border-radius:10px; padding:12px 14px;
+  font-size:13px; line-height:1.9; border:1px solid rgba(212,175,55,.12);
+}
+body.day-mode .log-box{background:rgba(0,0,0,.04);}
+.log-box p{margin:0 0 4px;}
+.dead-strip{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;}
+.dead-strip span{background:rgba(196,30,46,.15); border:1px solid rgba(196,30,46,.35); color:#ff9aa3; font-size:12px; padding:5px 10px; border-radius:14px;}
+
+/* ============================= NOTES ============================= */
+#notesToggle{position:fixed; right:16px; bottom:16px; z-index:60; border-radius:50px; padding:12px 16px; font-size:13px; box-shadow:0 8px 24px rgba(0,0,0,.5);}
+#notesPanel{
+  position:fixed; right:16px; bottom:74px; width:min(320px,86vw); max-height:60vh; z-index:60;
+  background:var(--black-2); border:1px solid var(--gold); border-radius:12px; padding:16px; display:none; flex-direction:column; gap:10px;
+  box-shadow:var(--shadow-deep);
+}
+body.day-mode #notesPanel{background:var(--day-panel);}
+#notesPanel.show{display:flex;}
+#notesArea{width:100%; min-height:140px; background:rgba(0,0,0,.3); border:1px solid rgba(212,175,55,.25); border-radius:8px; color:inherit; padding:10px; font-family:var(--ff-body); resize:vertical;}
+body.day-mode #notesArea{background:#fff;}
+
+/* ============================= HOST PANEL ============================= */
+.host-panel{border-top:1px dashed rgba(212,175,55,.3); margin-top:22px; padding-top:18px;}
+.host-panel .tag{font-size:11px; text-transform:uppercase; letter-spacing:.14em; color:var(--gold); margin-bottom:10px; display:block;}
+
+/* ============================= WIN SCREEN ============================= */
+.win-stage{display:flex; flex-direction:column; align-items:center; gap:16px; padding:40px 10px; text-align:center; position:relative;}
+.win-stage .big-icon{font-size:80px; animation:winPop .7s cubic-bezier(.3,1.6,.4,1);}
+@keyframes winPop{0%{transform:scale(0) rotate(-20deg); opacity:0;} 100%{transform:scale(1) rotate(0); opacity:1;}}
+.win-stage h2{font-size:32px; margin:0;}
+.confetti{position:absolute; top:-10px; width:8px; height:14px; opacity:.9; animation:fall linear forwards;}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg); opacity:0;}}
+
+/* ============================= MISC ============================= */
+.badge-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;}
+.badge{font-size:11px; padding:4px 10px; border-radius:20px; background:rgba(212,175,55,.12); color:var(--gold-2); border:1px solid rgba(212,175,55,.25);}
+.toast{
+  position:fixed; top:18px; left:50%; transform:translateX(-50%) translateY(-140%); z-index:200;
+  background:var(--black-2); border:1px solid var(--gold); color:var(--cream); padding:12px 20px; border-radius:10px;
+  font-size:14px; box-shadow:var(--shadow-deep); transition:transform .35s cubic-bezier(.3,1,.4,1); max-width:90vw; text-align:center;
+}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.center-text{text-align:center;}
+.muted{color:var(--grey); font-size:13px;}
+.eliminated-banner{
+  background:linear-gradient(135deg, rgba(196,30,46,.28), rgba(0,0,0,.4)); border:1px solid var(--red-glow);
+  border-radius:12px; padding:22px; text-align:center; margin-bottom:20px;
+}
+.eliminated-banner .skull{font-size:44px; display:block; margin-bottom:8px;}
+.mafia-role-list{display:flex; flex-direction:column; gap:8px; margin-top:14px;}
+.mafia-role-list .mrow{display:flex; justify-content:space-between; font-size:14px; padding:8px 10px; background:rgba(0,0,0,.25); border-radius:8px;}
+footer.small{margin-top:30px; text-align:center; color:var(--grey); font-size:11px; letter-spacing:.08em;}
+.sound-toggle{position:fixed; left:16px; bottom:16px; z-index:60; border-radius:50%; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:18px; box-shadow:0 8px 24px rgba(0,0,0,.5);}
+
+/* ============================= CHAT ============================= */
+#chatToggle{position:fixed; left:16px; bottom:76px; z-index:60; border-radius:50px; padding:12px 16px; font-size:13px; box-shadow:0 8px 24px rgba(0,0,0,.5); display:none;}
+#chatToggle .badge-count{background:var(--red); color:#fff; font-size:11px; font-weight:700; border-radius:10px; padding:1px 7px; margin-left:6px; display:none;}
+#chatPanel{
+  position:fixed; left:16px; bottom:134px; width:min(320px,86vw); max-height:56vh; z-index:60;
+  background:var(--black-2); border:1px solid var(--gold); border-radius:12px; padding:14px; display:none; flex-direction:column; gap:10px;
+  box-shadow:var(--shadow-deep);
+}
+body.day-mode #chatPanel{background:var(--day-panel);}
+#chatPanel.show{display:flex;}
+#chatMessages{flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; min-height:120px; max-height:38vh; padding-right:2px;}
+.chat-msg{font-size:13px; line-height:1.4; background:rgba(212,175,55,.06); border:1px solid rgba(212,175,55,.15); border-radius:8px; padding:7px 10px;}
+.chat-msg.me{background:rgba(196,30,46,.16); border-color:rgba(196,30,46,.35);}
+.chat-msg .cname{font-weight:700; color:var(--gold-2); font-size:11px; text-transform:uppercase; letter-spacing:.05em;}
+.chat-msg.dead-msg .cname::after{content:" ☠️"; }
+.chat-msg .ctext{margin-top:2px; word-break:break-word;}
+.chat-input-row{display:flex; gap:8px;}
+.chat-input-row input{flex:1; padding:10px 12px; border-radius:8px; border:1px solid rgba(212,175,55,.25); background:rgba(0,0,0,.3); color:inherit; font-size:14px; outline:none;}
+body.day-mode .chat-input-row input{background:#fff;}
+.chat-input-row button{border:none; border-radius:8px; padding:0 14px; background:var(--gold); color:#241a03; font-weight:700; cursor:pointer;}
+
+/* ============================= LOGOUT / MIC / DIRECTORY ============================= */
+#logoutBtn{position:fixed; top:16px; right:16px; z-index:70; border-radius:50px; padding:10px 16px; font-size:13px; display:none;}
+#micBtn{
+  position:fixed; bottom:16px; left:50%; transform:translateX(-50%); z-index:70;
+  width:64px; height:64px; border-radius:50%; border:none; display:none;
+  align-items:center; justify-content:center; font-size:26px;
+  background:linear-gradient(135deg, var(--black-3), var(--black-2)); border:2px solid var(--gold);
+  color:var(--gold-2); box-shadow:0 8px 24px rgba(0,0,0,.5); user-select:none;
+}
+#micBtn.talking{
+  background:linear-gradient(135deg, var(--red-2), var(--red)); color:#fff; border-color:var(--red-glow);
+  animation:micPulse 1s ease-in-out infinite;
+}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 6px rgba(196,30,46,.22);} 50%{box-shadow:0 0 0 14px rgba(196,30,46,.1);}}
+#micHint{position:fixed; bottom:86px; left:50%; transform:translateX(-50%); z-index:70; font-size:11px; color:var(--grey); display:none; white-space:nowrap;}
+
+.room-list-item{
+  display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; border-radius:10px;
+  background:rgba(212,175,55,.05); border:1px solid rgba(212,175,55,.18); margin-bottom:8px; cursor:pointer; transition:all .15s ease;
+}
+.room-list-item:hover{background:rgba(212,175,55,.12); border-color:var(--gold);}
+body.day-mode .room-list-item{background:rgba(161,18,31,.04);}
+
+/* ============================= PAYWALL / SUBSCRIPTION ============================= */
+.overlay{
+  position:fixed; inset:0; z-index:300; background:rgba(4,3,2,.72); backdrop-filter:blur(3px);
+  display:none; align-items:center; justify-content:center; padding:18px; overflow-y:auto;
+}
+.overlay.show{display:flex;}
+.overlay .card{width:100%; max-width:440px; max-height:92vh; overflow-y:auto; margin:auto;}
+.plan-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:18px 0 6px;}
+.plan-card{
+  border:1px solid rgba(212,175,55,.25); border-radius:12px; padding:14px 6px; text-align:center; cursor:pointer;
+  background:rgba(0,0,0,.25); transition:all .15s ease; position:relative;
+}
+body.day-mode .plan-card{background:rgba(0,0,0,.03);}
+.plan-card:hover{border-color:var(--gold);}
+.plan-card.selected{border-color:var(--gold); box-shadow:0 0 0 2px rgba(212,175,55,.3); background:rgba(212,175,55,.08);}
+.plan-card .plan-name{font-family:var(--ff-title); font-size:11.5px; color:var(--gold); text-transform:uppercase; letter-spacing:.05em;}
+.plan-card .plan-price{font-size:18px; font-weight:700; margin:7px 0 2px;}
+.plan-card .plan-per{font-size:10px; color:var(--grey);}
+.plan-card.best::before{content:"Ձեռնտու է"; position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:var(--red); color:#fff; font-size:10px; padding:3px 10px; border-radius:20px; font-weight:700; letter-spacing:.04em; white-space:nowrap;}
+.benefits-list{list-style:none; padding:0; margin:18px 0; display:flex; flex-direction:column; gap:10px;}
+.benefits-list li{display:flex; align-items:flex-start; gap:10px; font-size:14px; line-height:1.4;}
+.benefits-list li::before{content:"✔"; color:var(--gold); font-weight:700; flex-shrink:0;}
+.pay-methods{display:flex; gap:8px; flex-wrap:wrap; margin:14px 0 4px;}
+.pay-chip{
+  font-size:12px; padding:7px 12px; border-radius:20px; background:rgba(212,175,55,.1); border:1px solid rgba(212,175,55,.3);
+  color:var(--gold-2); font-weight:600;
+}
+.paywall-close{position:absolute; top:12px; right:14px; background:transparent; border:none; color:var(--grey); font-size:22px; cursor:pointer; line-height:1; padding:4px;}
+.paywall-note{font-size:12px; color:var(--grey); line-height:1.6; margin-top:16px; border-top:1px dashed rgba(212,175,55,.25); padding-top:12px;}
+
+#paymentChatOverlay .card{max-width:420px; display:flex; flex-direction:column;}
+.pay-status-tag{display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:5px 12px; border-radius:20px; font-weight:700; margin-bottom:6px;}
+.pay-status-tag.pending{background:rgba(212,175,55,.14); color:var(--gold-2); border:1px solid rgba(212,175,55,.35);}
+.pay-status-tag.approved{background:rgba(70,170,90,.15); color:#7ee0a0; border:1px solid rgba(70,170,90,.4);}
+.pay-status-tag.rejected{background:rgba(196,30,46,.15); color:#ff8a95; border:1px solid rgba(196,30,46,.4);}
+#paymentChatMessages{flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; min-height:180px; max-height:42vh; margin:12px 0; padding-right:2px;}
+.pay-msg{font-size:13px; line-height:1.4; padding:9px 12px; border-radius:10px; max-width:82%; word-break:break-word;}
+.pay-msg.admin{background:rgba(212,175,55,.1); border:1px solid rgba(212,175,55,.25); align-self:flex-start;}
+.pay-msg.user{background:rgba(196,30,46,.18); border:1px solid rgba(196,30,46,.35); align-self:flex-end;}
+.pay-msg .ptime{display:block; font-size:10px; color:var(--grey); margin-top:4px;}
+
+@media (max-width:480px){
+  .role-card-3d{width:180px; height:250px;}
+  .brand h1{font-size:30px;}
+  .plan-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div id="loadingScreen">
+  <div class="lmask">🎭</div>
+  <div class="spinner"></div>
+  <p id="loadingText">Կապվում ենք սերվերի հետ...</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<button class="btn btn-ghost sound-toggle" id="soundToggle" title="Ձայն">🔊</button>
+<button class="btn btn-ghost" id="logoutBtn" title="Դուրս գալ">🚪 Դուրս գալ</button>
+<div id="micHint">Սեղմած պահեք՝ խոսելու համար</div>
+<button id="micBtn" title="Սեղմած պահեք՝ խոսելու համար">🎤</button>
+
+<div id="app">
+
+  <div class="brand">
+    <svg class="brand-art" viewBox="0 0 900 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Մաֆիա խաղի նկար՝ գլխարկ, դիմակ և գիշերային քաղաքի սիլուետ">
+      <defs>
+        <radialGradient id="bgGlow" cx="50%" cy="28%" r="65%">
+          <stop offset="0%" stop-color="var(--red-glow)" stop-opacity="0.35"/>
+          <stop offset="45%" stop-color="var(--red)" stop-opacity="0.12"/>
+          <stop offset="100%" stop-color="var(--black)" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--black-2)"/>
+          <stop offset="100%" stop-color="var(--black)"/>
+        </linearGradient>
+        <radialGradient id="spotGrad" cx="50%" cy="0%" r="80%">
+          <stop offset="0%" stop-color="var(--gold-2)" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="var(--gold)" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="hatGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--black-3)"/>
+          <stop offset="100%" stop-color="var(--black)"/>
+        </linearGradient>
+      </defs>
+
+      <rect x="0" y="0" width="900" height="240" fill="url(#skyGrad)"/>
+      <rect x="0" y="0" width="900" height="240" fill="url(#bgGlow)"/>
+
+      <!-- moon -->
+      <circle cx="770" cy="58" r="46" fill="var(--gold)" opacity="0.12"/>
+      <circle cx="770" cy="58" r="28" fill="var(--gold-2)" opacity="0.9"/>
+
+      <!-- night skyline -->
+      <g opacity="0.85">
+        <rect x="0"   y="168" width="60"  height="72" fill="var(--black-3)"/>
+        <rect x="55"  y="140" width="46"  height="100" fill="var(--black-3)"/>
+        <rect x="96"  y="182" width="54"  height="58" fill="var(--black-3)"/>
+        <rect x="740" y="150" width="50"  height="90" fill="var(--black-3)"/>
+        <rect x="784" y="176" width="60"  height="64" fill="var(--black-3)"/>
+        <rect x="838" y="130" width="46"  height="110" fill="var(--black-3)"/>
+        <g fill="var(--gold-2)" opacity="0.55">
+          <rect x="10"  y="180" width="6" height="8"/>
+          <rect x="24"  y="180" width="6" height="8"/>
+          <rect x="10"  y="196" width="6" height="8"/>
+          <rect x="65"  y="155" width="6" height="8"/>
+          <rect x="80"  y="155" width="6" height="8"/>
+          <rect x="65"  y="172" width="6" height="8"/>
+          <rect x="750" y="165" width="6" height="8"/>
+          <rect x="765" y="165" width="6" height="8"/>
+          <rect x="795" y="190" width="6" height="8"/>
+          <rect x="812" y="190" width="6" height="8"/>
+          <rect x="848" y="148" width="6" height="8"/>
+          <rect x="862" y="148" width="6" height="8"/>
+        </g>
+      </g>
+
+      <!-- spotlight cone behind the hat -->
+      <polygon points="450,0 360,240 540,240" fill="url(#spotGrad)"/>
+
+      <!-- cigar smoke -->
+      <path d="M 600 150 C 610 130, 590 115, 605 95 C 618 78, 600 60, 615 40" fill="none" stroke="var(--gold)" stroke-width="2" opacity="0.35" stroke-linecap="round"/>
+
+      <!-- ace of spades card, tilted left -->
+      <g transform="translate(300,150) rotate(-16)">
+        <rect x="-30" y="-42" width="60" height="84" rx="6" fill="var(--cream)" stroke="var(--gold)" stroke-width="2"/>
+        <text x="-21" y="-22" font-family="var(--ff-title)" font-size="16" fill="var(--black)">A</text>
+        <path d="M0 -6 C -14 6, -14 20, 0 26 C 14 20, 14 6, 0 -6 Z" fill="var(--black)"/>
+        <rect x="-2" y="24" width="4" height="10" fill="var(--black)"/>
+      </g>
+
+      <!-- revolver silhouette, tilted right -->
+      <g transform="translate(600,168) rotate(14)">
+        <path d="M -40 0 L 20 0 L 20 -10 L 34 -10 L 34 4 L 20 4 L 20 10 L -10 10 L -10 24 L -22 24 L -22 10 L -40 10 Z"
+              fill="var(--black-3)" stroke="var(--gold)" stroke-width="1.5" stroke-linejoin="round"/>
+      </g>
+
+      <!-- fedora hat -->
+      <g transform="translate(450,120)">
+        <ellipse cx="0" cy="34" rx="108" ry="20" fill="url(#hatGrad)" stroke="var(--gold)" stroke-width="2.5"/>
+        <path d="M -66 20 C -70 -34, -30 -58, 0 -58 C 30 -58, 68 -36, 66 20 C 40 6, -40 6, -66 20 Z"
+              fill="url(#hatGrad)" stroke="var(--gold)" stroke-width="2.5" stroke-linejoin="round"/>
+        <rect x="-66" y="6" width="132" height="12" fill="var(--red)" opacity="0.9"/>
+      </g>
+
+      <!-- venetian mask beneath the brim -->
+      <g transform="translate(450,168)">
+        <path d="M -70 0 C -70 -22, -30 -30, 0 -30 C 30 -30, 70 -22, 70 0 C 70 26, 40 46, 0 46 C -40 46, -70 26, -70 0 Z"
+              fill="var(--black-2)" stroke="var(--gold-2)" stroke-width="2"/>
+        <path d="M -46 -2 C -38 -14, -20 -14, -14 -2 C -20 8, -38 8, -46 -2 Z" fill="var(--gold-2)" opacity="0.85"/>
+        <path d="M 46 -2 C 38 -14, 20 -14, 14 -2 C 20 8, 38 8, 46 -2 Z" fill="var(--gold-2)" opacity="0.85"/>
+        <path d="M 0 -2 L -6 14 L 6 14 Z" fill="var(--gold)" opacity="0.5"/>
+        <path d="M -70 0 C -80 6, -80 20, -66 26" fill="none" stroke="var(--gold)" stroke-width="1.5" opacity="0.6"/>
+        <path d="M 70 0 C 80 6, 80 20, 66 26" fill="none" stroke="var(--gold)" stroke-width="1.5" opacity="0.6"/>
+      </g>
+
+      <line x1="120" y1="240" x2="780" y2="240" stroke="var(--gold)" stroke-opacity="0.25" stroke-width="1"/>
+    </svg>
+    <h1>ՄԱՖԻԱ</h1>
+    <div class="sub">Realtime Multiplayer</div>
+  </div>
+
+  <!-- ============ LANDING ============ -->
+  <section class="screen" id="screen-landing">
+    <div class="card">
+      <h2 class="center-text" style="margin-top:0;">Բարի գալուստ</h2>
+      <p class="muted center-text">Ստեղծիր սենյակ կամ միացիր ընկերներիդ խաղին</p>
+      <div class="landing-actions">
+        <div class="field">
+          <label class="field-label">Քո անունը</label>
+          <input class="input" id="landingName" placeholder="օր. Արամ" maxlength="18">
+        </div>
+        <button class="btn btn-primary btn-block" id="btnCreateGame">🎲 Ստեղծել խաղ</button>
+        <div class="divider">կամ</div>
+        <div class="field" style="margin-bottom:10px;">
+          <label class="field-label">Սենյակի կոդ</label>
+          <input class="input" id="landingRoomCode" placeholder="օր. A1B2C3" style="text-transform:uppercase" maxlength="6">
+        </div>
+        <div class="field" style="margin-bottom:10px;">
+          <label class="field-label">Ընկերոջ գաղտնաբառ (եթե ունես՝ անվճար մուտք)</label>
+          <input class="input" id="landingRoomPassword" placeholder="օր. 4821" inputmode="numeric" maxlength="4">
+        </div>
+        <button class="btn btn-gold btn-block" id="btnJoinGame">🚪 Միանալ խաղին</button>
+      </div>
+      <p class="hint" id="configWarning" style="display:none; color:#ff8a95;"></p>
+      <div class="section-title" style="margin-top:26px;">🎮 Ակտիվ սենյակներ</div>
+      <div id="activeRoomsList"><p class="muted center-text" style="font-size:13px;">Փնտրում ենք ակտիվ սենյակներ...</p></div>
+    </div>
+    <footer class="small">10 խաղացող · Իրական ժամանակի սինխրոնացում · Supabase Realtime</footer>
+  </section>
+
+  <!-- ============ LOBBY ============ -->
+  <section class="screen" id="screen-lobby">
+    <div class="card">
+      <h2 style="margin-top:0;">Սպասասրահ</h2>
+      <div class="room-code-box">
+        <div>
+          <div class="muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.12em;">Սենյակի կոդ</div>
+          <div class="code" id="lobbyRoomCode">------</div>
+        </div>
+        <button class="btn btn-gold" id="btnCopyCode">📋 Կրկնօրինակել</button>
+      </div>
+      <div class="room-code-box" id="hostPasswordBox" style="display:none; border-color:rgba(196,30,46,.3);">
+        <div>
+          <div class="muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.12em;">🔑 Ընկերոջ գաղտնաբառ (անվճար մուտք)</div>
+          <div class="code" id="lobbyRoomPassword" style="color:var(--red-2);">----</div>
+        </div>
+        <button class="btn btn-ghost" id="btnCopyPassword">📋 Կրկնօրինակել</button>
+      </div>
+      <p class="muted" id="hostPasswordHint" style="display:none; font-size:11.5px; margin:-16px 0 22px; line-height:1.5;">
+        Այս գաղտնաբառով ցանկացած ընկեր կարող է մտնել ձեր սենյակը՝ առանց իր բաժանորդագրության վճարելու։ Կիսվեք միայն վստահելի մարդկանց հետ։
+      </p>
+      <div class="copy-link-row">
+        <input class="input" id="lobbyLink" readonly>
+        <button class="btn btn-ghost" id="btnCopyLink">🔗</button>
+      </div>
+
+      <div class="section-title">👥 Խաղացողներ (<span id="playerCount">0</span>/10)</div>
+      <div class="player-grid" id="playerGrid"></div>
+      <div class="slots-label" id="slotsLabel"></div>
+
+      <div class="host-panel" id="hostOnlyLobby" style="display:none;">
+        <span class="tag">👑 Խաղավարի կառավարում</span>
+        <button class="btn btn-primary btn-block" id="btnStartGame" disabled>▶️ Սկսել խաղը</button>
+      </div>
+      <p class="muted center-text" id="waitingForHostMsg" style="margin-top:16px;">Սպասում ենք, մինչև խաղավարը սկսի խաղը...</p>
+    </div>
+  </section>
+
+  <!-- ============ ROLE REVEAL ============ -->
+  <section class="screen" id="screen-role">
+    <div class="card role-stage">
+      <h2 style="margin:0;">Ձեր դերը</h2>
+      <p class="muted">Հպեք քարտին՝ բացելու համար</p>
+      <div class="role-card-3d" id="roleCard3d">
+        <div class="role-card-inner">
+          <div class="role-face back"><div class="mask">🎭</div><div class="muted">ՄԱՖԻԱ</div></div>
+          <div class="role-face front">
+            <div class="icon" id="roleIcon">🔴</div>
+            <h2 id="roleName">Բնակիչ</h2>
+            <p id="roleDesc">Դուք քաղաքի խաղաղ բնակիչ եք։</p>
+            <span class="role-team-tag red" id="roleTeamTag">ԿԱՐՄԻՐ ԹԻՄ</span>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-gold" id="btnRoleContinue" style="display:none;">Շարունակել →</button>
+    </div>
+  </section>
+
+  <!-- ============ GAME (NIGHT/DAY) ============ -->
+  <section class="screen" id="screen-game">
+    <div class="eliminated-banner" id="eliminatedBanner" style="display:none;">
+      <span class="skull">☠️</span>
+      <strong>Դուք դուրս եք մնացել խաղից</strong>
+      <p class="muted" style="margin:6px 0 0;">Դուք այլևս չեք կարող քվեարկել կամ գործողություն կատարել, բայց կարող եք հետևել խաղին։</p>
+    </div>
+
+    <div class="card">
+      <div class="phase-banner">
+        <span class="icon" id="phaseIcon">☀️</span>
+        <span id="phaseLabel">Ցերեկ · Օր 1</span>
+        <span id="timerBadge" style="display:none;">--</span>
+      </div>
+
+      <!-- NIGHT: sleeping (regular players) -->
+      <div id="nightSleepView" style="display:none;">
+        <div class="night-sleep">
+          <div class="stars" id="starsWrap"></div>
+          <div class="moon">🌙</div>
+          <h3 style="margin:0;">Քաղաքը քնած է...</h3>
+          <p class="muted">Մաֆիան և շերիֆը գործում են ստվերում։</p>
+        </div>
+      </div>
+
+      <!-- NIGHT: mafia/don action -->
+      <div id="mafiaActionView" style="display:none;">
+        <div class="section-title">⚫ Ընտրեք զոհին</div>
+        <div class="target-list" id="mafiaTargetList"></div>
+        <p class="muted" id="mafiaVoteStatus"></p>
+      </div>
+
+      <!-- NIGHT: sheriff action -->
+      <div id="sheriffActionView" style="display:none;">
+        <div class="section-title">⭐ Ընտրեք ստուգելու խաղացողին</div>
+        <div class="target-list" id="sheriffTargetList"></div>
+        <p class="muted" id="sheriffResultMsg"></p>
+      </div>
+
+      <!-- DAY: log + voting -->
+      <div id="dayView" style="display:none;">
+        <div class="section-title">📜 Գիշերվա արդյունքը</div>
+        <div class="log-box" id="nightResultLog"></div>
+
+        <div class="section-title">🗳️ Քվեարկություն</div>
+        <div class="target-list" id="dayVoteList"></div>
+        <p class="muted" id="dayVoteStatus"></p>
+      </div>
+
+      <div class="section-title">📜 Խաղի ընթացք</div>
+      <div class="log-box" id="gameLog"></div>
+
+      <div class="section-title">☠️ Հեռացվածներ</div>
+      <div class="dead-strip" id="deadStrip"><span class="muted" style="background:none;border:none;">Դեռ ոչ ոք</span></div>
+
+      <div class="host-panel" id="hostOnlyGame" style="display:none;">
+        <span class="tag">👑 Խաղավարի կառավարում</span>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btnTogglePhase">🌙 Անցնել Գիշերվա</button>
+          <button class="btn btn-ghost" id="btnEndGame">⏹️ Ավարտել խաղը</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WIN SCREEN ============ -->
+  <section class="screen" id="screen-win">
+    <div class="card win-stage" id="winStageInner">
+      <div class="big-icon" id="winIcon">🏆</div>
+      <h2 id="winTitle">Հաղթանակ!</h2>
+      <p class="muted" id="winSubtitle">Կարմիրները հաղթեցին</p>
+
+      <div class="mafia-role-list" id="finalRolesList"></div>
+
+      <div class="host-panel" id="hostOnlyWin" style="display:none; width:100%;">
+        <span class="tag">👑 Խաղավարի կառավարում</span>
+        <div class="btn-row">
+          <button class="btn btn-gold" id="btnReplaySame">🔁 Վերախաղալ նույն կազմով</button>
+          <button class="btn btn-primary" id="btnNewGame">🔄 Նոր խաղ</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<button class="btn btn-gold" id="chatToggle">💬 Չաթ<span class="badge-count" id="chatBadge">0</span></button>
+<div id="chatPanel">
+  <strong>💬 Սենյակի չաթը</strong>
+  <div id="chatMessages"></div>
+  <div class="chat-input-row">
+    <input id="chatInput" type="text" maxlength="240" placeholder="Գրեք հաղորդագրություն...">
+    <button id="chatSendBtn">➤</button>
+  </div>
+</div>
+
+<button class="btn btn-gold" id="notesToggle">📝 Իմ նշումները</button>
+<div id="notesPanel">
+  <strong>📝 Իմ նկատողությունները</strong>
+  <textarea id="notesArea" placeholder="Գրեք ձեր դիտարկումները այստեղ... (տեսանելի է միայն ձեզ)"></textarea>
+  <button class="btn btn-ghost" id="btnCloseNotes">Փակել</button>
+</div>
+
+<!-- ============ PAYWALL ============ -->
+<div class="overlay" id="paywallOverlay">
+  <div class="card" style="position:relative;">
+    <button class="paywall-close" id="btnClosePaywall">✕</button>
+    <h2 class="center-text" style="margin-top:0;">🔒 Բաժանորդագրություն</h2>
+    <p class="muted center-text" id="paywallSubtitle">Այս գործողության համար անհրաժեշտ է ակտիվ բաժանորդագրություն</p>
+
+    <div class="plan-grid">
+      <div class="plan-card" id="planDaily" data-plan="daily" data-amount="200">
+        <div class="plan-name">1 օր</div>
+        <div class="plan-price">200 ֏</div>
+        <div class="plan-per">/ օր</div>
+      </div>
+      <div class="plan-card selected" id="planMonthly" data-plan="monthly" data-amount="1000">
+        <div class="plan-name">Ամսական</div>
+        <div class="plan-price">1000 ֏</div>
+        <div class="plan-per">/ ամիս</div>
+      </div>
+      <div class="plan-card best" id="planYearly" data-plan="yearly" data-amount="5500">
+        <div class="plan-name">Տարեկան</div>
+        <div class="plan-price">5500 ֏</div>
+        <div class="plan-per">/ տարի</div>
+      </div>
+    </div>
+
+    <ul class="benefits-list">
+      <li>Անսահմանափակ խաղեր ընկերների հետ</li>
+      <li>Խաղն ամբողջությամբ բացված՝ առանց սահմանափակումների</li>
+      <li>Մուտք բոլոր ակտիվ սենյակներ</li>
+    </ul>
+
+    <div class="section-title" style="margin-top:6px;">💳 Վճարման եղանակներ</div>
+    <div class="pay-methods">
+      <span class="pay-chip">Idram</span>
+      <span class="pay-chip">Ameriabank</span>
+      <span class="pay-chip">Converse</span>
+      <span class="pay-chip">Apple Pay</span>
+    </div>
+
+    <button class="btn btn-primary btn-block" id="btnPayNow" style="margin-top:18px;">💳 Վճարել</button>
+    <p class="paywall-note">Վճարումն ավտոմատ չի մշակվում համակարգի կողմից։ «Վճարել» սեղմելուց հետո կբացվի չաթ ադմինիստրատորի հետ, որտեղ կհամաձայնեցնեք վճարման մանրամասները և կստանաք հաստատում իրական ժամանակում։</p>
+  </div>
+</div>
+
+<!-- ============ PAYMENT CHAT ============ -->
+<div class="overlay" id="paymentChatOverlay">
+  <div class="card" style="position:relative;">
+    <button class="paywall-close" id="btnClosePaymentChat">✕</button>
+    <h2 style="margin-top:0;">💬 Չաթ ադմինիստրատորի հետ</h2>
+    <span class="pay-status-tag pending" id="payStatusTag">⏳ Սպասման մեջ</span>
+    <div id="paymentChatMessages"></div>
+    <div class="chat-input-row">
+      <input class="input" id="paymentChatInput" type="text" maxlength="500" placeholder="Գրեք հաղորդագրություն...">
+      <button class="btn btn-gold" id="btnSendPaymentMsg">➤</button>
+    </div>
+    <p class="paywall-note" id="paymentChatHint">Ադմինիստրատորը շուտով կպատասխանի։ Հաստատումից հետո խաղը ավտոմատ կբացվի։</p>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   ՄԱՖԻԱ — Realtime multiplayer via Supabase Realtime (Broadcast + Presence)
+   No custom backend, no database tables required. Single-file, GitHub-Pages ready.
+
+   ⚠️ CONFIGURATION REQUIRED ⚠️
+   This project intentionally avoids Firebase, as requested. It uses Supabase
+   instead. Supabase Realtime channels (broadcast/presence) work WITHOUT any
+   database schema — you only need a free Supabase project's URL + anon key.
+   Create one at https://supabase.com (free tier), then paste the two values
+   below. Nothing else needs to be configured on the Supabase side.
+   ===================================================================== */
+const SUPABASE_URL = "https://rbdifnhcqytbduzgekbh.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Sjgo0uZgfTtaB1ljkh9bdw_DA77GzHz";
+
+/* ===================== CONSTANTS ===================== */
+const MAX_PLAYERS = 10;
+const ROLE_DEF = {
+  citizen: {icon:"🔴", name:"Խաղաղ բնակիչ", team:"red", desc:"Դուք քաղաքի խաղաղ բնակիչ եք։ Ձեր նպատակն է հայտնաբերել և հեռացնել մաֆիային ցերեկային քվեարկությամբ։"},
+  mafia:   {icon:"⚫", name:"Մաֆիա",         team:"black", desc:"Դուք մաֆիայի անդամ եք։ Գիշերը դոնի հետ միասին ընտրեք զոհ։ Թաքցրեք ձեր դերը ցերեկը։"},
+  sheriff: {icon:"⭐", name:"Շերիֆ",         team:"red", desc:"Դուք շերիֆն եք։ Ամեն գիշեր կարող եք ստուգել մեկ խաղացողի և իմանալ՝ նա Սև է, թե Կարմիր։"},
+  don:     {icon:"👑", name:"Դոն",           team:"black", desc:"Դուք մաֆիայի դոնն եք։ Դուք էլ եք ընտրում զոհին գիշերը, մաֆիաների հետ միասին։"}
+};
+function roleComposition(n){
+  // Scales gracefully from 1 to 10 players.
+  // At n=10 this reproduces the original 6 citizen / 2 mafia / 1 sheriff / 1 don split.
+  let mafiaCount = n>=2 ? 1 : 0;
+  if(n>=6) mafiaCount = 2;
+  const sheriffCount = n>=3 ? 1 : 0;
+  const donCount = n>=7 ? 1 : 0;
+  const citizenCount = Math.max(0, n - mafiaCount - sheriffCount - donCount);
+  const list = [
+    ...Array(mafiaCount).fill("mafia"),
+    ...Array(donCount).fill("don"),
+    ...Array(sheriffCount).fill("sheriff"),
+    ...Array(citizenCount).fill("citizen")
+  ];
+  return shuffle(list);
+}
+
+function genUUID(){
+  if(window.crypto && typeof crypto.randomUUID === 'function'){
+    try{ return crypto.randomUUID(); }catch(e){ /* fall through */ }
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c=>{
+    const r = Math.random()*16|0;
+    const v = c==='x' ? r : (r&0x3|0x8);
+    return v.toString(16);
+  });
+}
+
+/* ===================== STATE ===================== */
+let sb = null;
+let channel = null;
+let dirChannel = null;
+
+/* Supabase Realtime channels need to reach state 'joined' before broadcast.send()
+   avoids its REST-API fallback. This retries briefly instead of sending too early. */
+function safeSend(ch, payload, attemptsLeft){
+  if(attemptsLeft === undefined) attemptsLeft = 10;
+  if(!ch) return;
+  if(ch.state === 'joined'){
+    ch.send(payload);
+    return;
+  }
+  if(attemptsLeft <= 0) return;
+  setTimeout(()=> safeSend(ch, payload, attemptsLeft-1), 150);
+}
+let activeRooms = {};
+let peers = {};          // peerId -> RTCPeerConnection
+let localStream = null;  // our microphone stream (muted unless push-to-talk held)
+let myId = sessionStorage.getItem('mafia_myId') || genUUID();
+sessionStorage.setItem('mafia_myId', myId);
+let myName = sessionStorage.getItem('mafia_myName') || "";
+let roomCode = null;
+let isHost = false;
+
+/* Persistent per-device id (localStorage, survives tab/session close) used
+   only to remember this device's subscription status across visits. */
+let deviceId = localStorage.getItem('mafia_device_id');
+if(!deviceId){ deviceId = genUUID(); localStorage.setItem('mafia_device_id', deviceId); }
+
+/*
+  game state — kept authoritative on the HOST client only.
+  Host re-broadcasts the full snapshot on every change via 'state-sync'.
+  Everyone (including host) renders purely from the last received snapshot.
+*/
+let game = null;
+function freshGame(code){
+  return {
+    roomCode: code,
+    password: null,        // 4-digit room password, free entry for friends who know it
+    phase: "lobby",        // lobby | reveal | night | day | ended
+    dayNumber: 1,
+    players: [],           // {id,name,role,alive,isHost}
+    nightActions: { mafiaVotes:{}, sheriffTarget:null, sheriffResultFor:null, sheriffResultAnswer:null },
+    dayVotes: {},           // voterId -> targetId
+    log: [],
+    lastNightDeaths: [],
+    winner: null,           // 'red' | 'black' | null
+    phaseStartedAt: null,
+    phaseDurationMs: null
+  };
+}
+
+/* ===================== UTIL ===================== */
+function $(id){return document.getElementById(id);}
+function shuffle(arr){const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a;}
+function genRoomCode(){const chars="ABCDEFGHJKLMNPQRSTUVWXYZ123456789"; let s=""; for(let i=0;i<6;i++) s+=chars[Math.floor(Math.random()*chars.length)]; return s;}
+function genRoomPassword(){ return String(Math.floor(1000+Math.random()*9000)); } // 4-digit, easy to say out loud
+function initials(name){return (name||"?").trim().slice(0,2).toUpperCase();}
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  $(id).classList.add("active");
+}
+function toast(msg, ms=2600){
+  const t=$("toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"), ms);
+}
+function setDayMode(isDay){ document.body.classList.toggle("day-mode", isDay); }
+function me(){ return game ? game.players.find(p=>p.id===myId) : null; }
+function amIAlive(){ const p=me(); return p ? p.alive : true; }
+
+/* ---------- tiny sound engine (no external files) ---------- */
+let audioCtx=null; let soundOn = sessionStorage.getItem('mafia_sound') !== 'off';
+function ensureAudio(){ if(!audioCtx){ try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } }
+function beep(freq=440, dur=0.18, type='sine', vol=0.08){
+  if(!soundOn) return;
+  ensureAudio(); if(!audioCtx) return;
+  const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
+  o.type=type; o.frequency.value=freq; g.gain.value=vol;
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+dur);
+  o.stop(audioCtx.currentTime+dur);
+}
+function sfx(kind){
+  if(kind==='join') beep(660,.12,'triangle',.06);
+  if(kind==='night') { beep(220,.4,'sine',.07); setTimeout(()=>beep(180,.5,'sine',.06),200); }
+  if(kind==='day') { beep(520,.15,'triangle',.07); setTimeout(()=>beep(660,.2,'triangle',.07),140); }
+  if(kind==='death') { beep(140,.35,'sawtooth',.06); }
+  if(kind==='vote') beep(880,.08,'square',.04);
+  if(kind==='win') { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.3,'triangle',.08), i*140)); }
+  if(kind==='flip') beep(400,.1,'sine',.05);
+}
+$("soundToggle").addEventListener('click', ()=>{
+  soundOn=!soundOn; sessionStorage.setItem('mafia_sound', soundOn?'on':'off');
+  $("soundToggle").textContent = soundOn ? "🔊" : "🔇";
+});
+$("soundToggle").textContent = soundOn ? "🔊" : "🔇";
+
+/* ---------- ambient stars for night view ---------- */
+function paintStars(){
+  const wrap=$("starsWrap"); if(!wrap || wrap.children.length) return;
+  for(let i=0;i<40;i++){
+    const s=document.createElement('div'); s.className='star';
+    s.style.left=Math.random()*100+'%'; s.style.top=Math.random()*100+'%';
+    s.style.animationDelay=(Math.random()*2.5)+'s';
+    wrap.appendChild(s);
+  }
+}
+
+/* ---------- confetti for win screen ---------- */
+function launchConfetti(){
+  const colors=['#d4af37','#c41e2e','#f0d377','#ece6da'];
+  const stage=$("winStageInner");
+  for(let i=0;i<50;i++){
+    const c=document.createElement('div'); c.className='confetti';
+    c.style.left=Math.random()*100+'%';
+    c.style.background=colors[Math.floor(Math.random()*colors.length)];
+    c.style.animationDuration=(2+Math.random()*2)+'s';
+    c.style.animationDelay=(Math.random()*0.6)+'s';
+    stage.appendChild(c);
+    setTimeout(()=>c.remove(), 4500);
+  }
+}
+
+/* ===================== SUPABASE / CHANNEL SETUP ===================== */
+function initSupabase(){
+  if(window.location.protocol === 'file:'){
+    $("configWarning").style.display='block';
+    $("configWarning").innerHTML = "⚠ Այս էջը բացված է <b>file://</b> հասցեով։ Browser-ները արգելափակում են WebSocket/Realtime կապերը file:// էջերից, ուստի multiplayer-ը այս ռեժիմում չի կարող աշխատել։<br><br>Փորձարկման համար բացեք տերմինալում այս պանակում՝ <code>python3 -m http.server 8000</code>, ապա բացեք <code>http://localhost:8000</code>։<br>Կամ ուղղակիորեն վերբեռնեք GitHub Pages-ում և թեստավորեք այնտեղից։";
+    $("loadingText").textContent="Սպասվում է http(s) միջավայր...";
+    setTimeout(()=>{ $("loadingScreen").style.opacity='0'; setTimeout(()=>$("loadingScreen").style.display='none',500); }, 900);
+    showScreen("screen-landing");
+    return false;
+  }
+  if(SUPABASE_URL.includes("YOUR-PROJECT-REF") || SUPABASE_ANON_KEY.includes("YOUR-PUBLIC-ANON-KEY") || SUPABASE_ANON_KEY.includes("YOUR-PUBLISHABLE-KEY")){
+    $("configWarning").style.display='block';
+    $("configWarning").textContent = "⚠ Անհրաժեշտ է կարգավորել Supabase URL և anon key-ը index.html ֆայլի սկզբում (SUPABASE_URL / SUPABASE_ANON_KEY), հակառակ դեպքում իրական ժամանակի սինխրոնացումը չի աշխատի։";
+    $("loadingText").textContent="Սպասվում է կարգավորում...";
+    setTimeout(()=>{ $("loadingScreen").style.opacity='0'; setTimeout(()=>$("loadingScreen").style.display='none',500); }, 900);
+    showScreen("screen-landing");
+    return false;
+  }
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return true;
+}
+
+let chatMessages = [];
+let unreadChat = 0;
+
+function connectToRoom(code, onReady){
+  if(channel){ try{ sb.removeChannel(channel); }catch(e){} channel=null; }
+  roomCode = code;
+  chatMessages = [];
+  unreadChat = 0;
+  channel = sb.channel("mafia-room-"+code, {
+    config:{ broadcast:{ self:true, ack:false }, presence:{ key: myId } }
+  });
+
+  channel.on('broadcast', {event:'chat'}, ({payload}) => {
+    chatMessages.push(payload);
+    if(chatMessages.length>300) chatMessages.shift();
+    renderChat();
+    if(payload.from!==myId){
+      sfx('vote');
+      if(!$("chatPanel").classList.contains('show')){
+        unreadChat++; updateChatBadge();
+      }
+    }
+  });
+
+  channel.on('broadcast', {event:'action'}, ({payload}) => {
+    if(isHost) handleIncomingAction(payload);
+  });
+
+  channel.on('broadcast', {event:'state-sync'}, ({payload}) => {
+    game = payload;
+    try{ sessionStorage.setItem('mafia_gamecache_'+code, JSON.stringify(game)); }catch(e){}
+    render();
+  });
+
+  channel.on('broadcast', {event:'voice-signal'}, ({payload}) => {
+    if(payload.to !== myId) return;
+    handleVoiceSignal(payload);
+  });
+
+  channel.on('presence', {event:'sync'}, () => {
+    if(isHost) syncPresenceIntoRoster();
+  });
+
+  channel.subscribe((status) => {
+    if(status === 'SUBSCRIBED'){
+      channel.track({ id: myId, name: myName, joinedAt: Date.now() });
+      if(onReady) onReady();
+    }
+  });
+}
+
+/* Host keeps players[] roster in sync with live presence (join/leave) */
+function syncPresenceIntoRoster(){
+  if(!isHost || !game) return;
+  const state = channel.presenceState();
+  const presentIds = Object.keys(state);
+
+  // Add newly-present players (only while lobby still open)
+  presentIds.forEach(pid=>{
+    const meta = state[pid][0];
+    if(!game.players.find(p=>p.id===pid)){
+      if(game.phase==='lobby' && game.players.length < MAX_PLAYERS){
+        game.players.push({id:pid, name: meta.name || "Խաղացող", role:null, alive:true, isHost: pid===myId});
+        pushLog(`${meta.name || "Խաղացողը"} միացավ խաղին։`);
+        sfx('join');
+      }
+    } else {
+      // keep name fresh
+      const existing = game.players.find(p=>p.id===pid);
+      if(meta.name) existing.name = meta.name;
+    }
+  });
+
+  broadcastState();
+}
+
+function pushLog(text){
+  if(!game) return;
+  game.log.push(text);
+  if(game.log.length>200) game.log.shift();
+}
+
+function broadcastState(){
+  if(!isHost || !channel || !game) return;
+  safeSend(channel, {type:'broadcast', event:'state-sync', payload: game});
+  try{ sessionStorage.setItem('mafia_gamecache_'+roomCode, JSON.stringify(game)); }catch(e){}
+  updateDirectory();
+}
+
+function updateDirectory(){
+  if(!dirChannel || !isHost || !game || !roomCode) return;
+  if(game.phase==='lobby' && game.players.length < MAX_PLAYERS){
+    safeSend(dirChannel, {type:'broadcast', event:'room-announce', payload:{code:roomCode, hostName:myName, playerCount:game.players.length, ts:Date.now()}});
+  } else {
+    safeSend(dirChannel, {type:'broadcast', event:'room-closed', payload:{code:roomCode}});
+  }
+}
+
+function sendAction(type, data){
+  if(!channel) return;
+  safeSend(channel, {type:'broadcast', event:'action', payload:{type, data, from:myId, ts:Date.now()}});
+}
+
+/* ===================== HOST: ACTION HANDLING ===================== */
+function handleIncomingAction(payload){
+  const {type, data, from} = payload;
+  if(!game) return;
+  const actor = game.players.find(p=>p.id===from);
+
+  if(type==='ping-host'){
+    broadcastState();
+    return;
+  }
+
+  if(type==='start-game'){
+    if(game.phase!=='lobby' || game.players.length<1) return;
+    startGameRoles();
+    return;
+  }
+
+  if(type==='mafia-vote'){
+    if(!actor || !actor.alive) return;
+    const role = actor.role;
+    if(role!=='mafia' && role!=='don') return;
+    if(game.phase!=='night') return;
+    game.nightActions.mafiaVotes[from] = data.targetId;
+    checkMafiaConsensus();
+    broadcastState();
+    return;
+  }
+
+  if(type==='sheriff-check'){
+    if(!actor || !actor.alive || actor.role!=='sheriff') return;
+    if(game.phase!=='night') return;
+    const target = game.players.find(p=>p.id===data.targetId);
+    if(!target) return;
+    const answer = target.role==='mafia' || target.role==='don' ? "Սև" : "Կարմիր";
+    game.nightActions.sheriffTarget = data.targetId;
+    game.nightActions.sheriffResultFor = from;
+    game.nightActions.sheriffResultAnswer = answer;
+    pushLog(`⭐ Շերիֆը ստուգում կատարեց։`);
+    broadcastState();
+    return;
+  }
+
+  if(type==='day-vote'){
+    if(!actor || !actor.alive) return;
+    if(game.phase!=='day') return;
+    game.dayVotes[from] = data.targetId;
+    broadcastState();
+    checkVoteComplete();
+    return;
+  }
+
+  if(type==='toggle-phase'){
+    if(from!==game.players.find(p=>p.isHost)?.id) return;
+    togglePhase();
+    return;
+  }
+
+  if(type==='end-game'){
+    if(from!==game.players.find(p=>p.isHost)?.id) return;
+    game.phase='ended'; game.winner=null;
+    pushLog("Խաղավարն ավարտեց խաղը։");
+    broadcastState();
+    return;
+  }
+
+  if(type==='replay-same'){
+    resetForReplay(true);
+    return;
+  }
+  if(type==='new-game'){
+    resetForReplay(false);
+    return;
+  }
+}
+
+function checkMafiaConsensus(){
+  const votes = game.nightActions.mafiaVotes;
+  const blackAliveCount = game.players.filter(p=>p.alive && (p.role==='mafia'||p.role==='don')).length;
+  if(blackAliveCount===0) return;
+  const needed = Math.floor(blackAliveCount/2) + 1; // simple majority
+  const counts={};
+  Object.values(votes).forEach(t=>counts[t]=(counts[t]||0)+1);
+  for(const [target,c] of Object.entries(counts)){
+    if(c>=needed){
+      game.nightActions.agreedVictim = target;
+    }
+  }
+}
+
+function checkVoteComplete(){
+  const alivePlayers = game.players.filter(p=>p.alive);
+  const votesCast = Object.keys(game.dayVotes).length;
+  if(votesCast >= alivePlayers.length){
+    resolveDayVote();
+  }
+}
+
+function resolveDayVote(){
+  const counts={};
+  Object.values(game.dayVotes).forEach(t=>counts[t]=(counts[t]||0)+1);
+  let max=0, top=[];
+  for(const [t,c] of Object.entries(counts)){
+    if(c>max){max=c; top=[t];} else if(c===max){top.push(t);}
+  }
+  if(top.length!==1){
+    pushLog("🗳️ Ձայները հավասար են։ Նոր քվեարկություն է սկսվում։");
+    game.dayVotes = {};
+    broadcastState();
+    return;
+  }
+  const eliminated = game.players.find(p=>p.id===top[0]);
+  if(eliminated){
+    eliminated.alive=false;
+    pushLog(`🗳️ Քաղաքը հեռացրեց ${eliminated.name}-ին։ Նա եղել է՝ ${ROLE_DEF[eliminated.role].icon} ${ROLE_DEF[eliminated.role].name}։`);
+  }
+  game.dayVotes = {};
+  const winner = computeWinner();
+  if(winner){
+    endWithWinner(winner);
+  } else {
+    startNight();
+  }
+}
+
+function computeWinner(){
+  const alive = game.players.filter(p=>p.alive);
+  const black = alive.filter(p=>p.role==='mafia'||p.role==='don').length;
+  const red = alive.length - black;
+  if(black===0) return 'red';
+  if(black>=red) return 'black';
+  return null;
+}
+
+function endWithWinner(winner){
+  game.phase='ended';
+  game.winner=winner;
+  pushLog(winner==='red' ? "🏆 Կարմիրները հաղթեցին!" : "🏆 Մաֆիան հաղթեց!");
+  broadcastState();
+}
+
+/* ===================== HOST: GAME FLOW ===================== */
+function startGameRoles(){
+  const roles = roleComposition(game.players.length);
+  game.players.forEach((p,i)=>{ p.role = roles[i]; p.alive=true; });
+  game.phase='reveal';
+  game.dayNumber=1;
+  pushLog("🎲 Դերերը բաժանվեցին։ Խաղը սկսվում է։");
+  broadcastState();
+  setTimeout(()=>{ if(game && game.phase==='reveal'){ startNight(); } }, 4500);
+}
+
+function startNight(){
+  game.phase='night';
+  game.nightActions = { mafiaVotes:{}, sheriffTarget:null, sheriffResultFor:null, sheriffResultAnswer:null, agreedVictim:null };
+  game.phaseStartedAt = Date.now();
+  pushLog(`🌙 Գիշեր ${game.dayNumber} սկսվեց։`);
+  broadcastState();
+}
+
+function resolveNightAndGoDay(){
+  const victimId = game.nightActions.agreedVictim;
+  game.lastNightDeaths=[];
+  if(victimId){
+    const victim = game.players.find(p=>p.id===victimId);
+    if(victim && victim.alive){
+      victim.alive=false;
+      game.lastNightDeaths.push(victim.name);
+      pushLog(`☠️ Գիշերը սպանվեց ${victim.name}-ը։`);
+    }
+  } else {
+    pushLog("🌙 Այս գիշեր ոչ ոք չսպանվեց։");
+  }
+  const winner = computeWinner();
+  if(winner){ endWithWinner(winner); return; }
+  game.phase='day';
+  game.dayVotes={};
+  game.phaseStartedAt=Date.now();
+  pushLog(`☀️ Ցերեկ ${game.dayNumber} սկսվեց։`);
+  broadcastState();
+}
+
+function togglePhase(){
+  if(game.phase==='night'){
+    resolveNightAndGoDay();
+  } else if(game.phase==='day'){
+    game.dayNumber++;
+    startNight();
+  }
+}
+
+function resetForReplay(sameRoster){
+  const hostId = game.players.find(p=>p.isHost)?.id;
+  const roster = sameRoster ? game.players.map(p=>({id:p.id,name:p.name,role:null,alive:true,isHost:p.isHost})) : [];
+  game = freshGame(roomCode);
+  if(sameRoster){
+    game.players = roster;
+  }
+  pushLog(sameRoster ? "🔁 Նոր խաղ սկսվում է նույն կազմով։" : "🔄 Սենյակը զրոյացվեց նոր խաղի համար։");
+  broadcastState();
+}
+
+/* ===================== SUBSCRIPTION / PAYWALL ===================== */
+let mySubscription = { active:false, plan:null, expiresAt:null };
+let expiredPlanInfo = null; // {plan, expiresAt} set when a past subscription is found lapsed
+let currentRequestId = localStorage.getItem('mafia_payment_request_id') || null;
+let selectedPlan = { plan:'monthly', amount:1000 };
+let pendingAction = null;
+let payReqChannel = null;
+let payMsgChannel = null;
+
+function planLabel(plan){ return plan==='yearly' ? 'Տարեկան' : plan==='daily' ? '1 օր' : 'Ամսական'; }
+
+function subscriptionActive(){
+  return !!(mySubscription.active && mySubscription.expiresAt && new Date(mySubscription.expiresAt) > new Date());
+}
+
+function requireSubscription(kind, proceedFn){
+  const name = $("landingName").value.trim();
+  if(!name){ toast("Գրեք ձեր անունը"); return; }
+  if(kind==='join'){
+    const code = $("landingRoomCode").value.trim();
+    if(!code || code.length<4){ toast("Մուտքագրեք սենյակի կոդը"); return; }
+  }
+  if(subscriptionActive()){ proceedFn(); return; }
+  pendingAction = proceedFn;
+  if(currentRequestId){
+    openPaymentChatForExisting();
+  } else {
+    openPaywall();
+  }
+}
+
+function openPaywall(){
+  const sub = $("paywallSubtitle");
+  if(expiredPlanInfo){
+    const planTxt = planLabel(expiredPlanInfo.plan);
+    const dateTxt = new Date(expiredPlanInfo.expiresAt).toLocaleDateString('hy-AM', {day:'2-digit', month:'2-digit', year:'numeric'});
+    sub.innerHTML = `⏳ Ձեր <b>${planTxt}</b> փաթեթն ավարտվել է (${dateTxt})։ Խնդրում ենք նորոգել՝ խաղը շարունակելու համար։`;
+  } else {
+    sub.textContent = 'Այս գործողության համար անհրաժեշտ է ակտիվ բաժանորդագրություն';
+  }
+  $("paywallOverlay").classList.add('show');
+}
+function closePaywall(){ $("paywallOverlay").classList.remove('show'); }
+$("btnClosePaywall").addEventListener('click', closePaywall);
+
+document.querySelectorAll('.plan-card').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedPlan = { plan: el.dataset.plan, amount: parseInt(el.dataset.amount,10) };
+  });
+});
+
+async function submitPaymentRequest(){
+  if(!sb){ toast("Կապ չկա սերվերի հետ։"); return; }
+  const name = $("landingName").value.trim() || myName || "Անանուն";
+  const btn = $("btnPayNow");
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = "Ուղարկվում է...";
+  try{
+    const { data, error } = await sb.from('payment_requests').insert({
+      device_id: deviceId,
+      name: name,
+      plan: selectedPlan.plan,
+      amount: selectedPlan.amount,
+      status: 'pending'
+    }).select().single();
+    if(error) throw error;
+    currentRequestId = data.id;
+    localStorage.setItem('mafia_payment_request_id', currentRequestId);
+    // Auto-reply, recorded in the thread so it's also visible in the admin panel
+    await sb.from('payment_messages').insert({
+      request_id: currentRequestId,
+      sender: 'admin',
+      message: 'Ձեր հայտն ուղարկվել է ադմինին, խնդրում ենք սպասել։'
+    });
+    closePaywall();
+    openPaymentChat();
+    subscribeToPaymentRequest(currentRequestId);
+    subscribeToPaymentMessages(currentRequestId);
+    await loadPaymentMessages(currentRequestId);
+  }catch(e){
+    console.error(e);
+    toast("Չհաջողվեց ուղարկել հայտը։ Փորձեք կրկին։");
+  }finally{
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+$("btnPayNow").addEventListener('click', submitPaymentRequest);
+
+function openPaymentChat(){ $("paymentChatOverlay").classList.add('show'); }
+function closePaymentChat(){ $("paymentChatOverlay").classList.remove('show'); }
+$("btnClosePaymentChat").addEventListener('click', closePaymentChat);
+
+async function openPaymentChatForExisting(){
+  if(!currentRequestId) return;
+  openPaymentChat();
+  subscribeToPaymentRequest(currentRequestId);
+  subscribeToPaymentMessages(currentRequestId);
+  await loadPaymentMessages(currentRequestId);
+}
+
+async function loadPaymentMessages(requestId){
+  try{
+    const { data, error } = await sb.from('payment_messages')
+      .select('*').eq('request_id', requestId).order('created_at', {ascending:true});
+    if(error) throw error;
+    renderPaymentChat(data||[]);
+    const { data: reqData } = await sb.from('payment_requests').select('*').eq('id', requestId).single();
+    if(reqData) updatePayStatusTag(reqData.status);
+  }catch(e){ console.error(e); }
+}
+
+function renderPaymentChat(messages){
+  const wrap = $("paymentChatMessages");
+  wrap.innerHTML = messages.map(m=>{
+    const time = new Date(m.created_at).toLocaleTimeString('hy-AM', {hour:'2-digit',minute:'2-digit'});
+    return `<div class="pay-msg ${m.sender==='admin'?'admin':'user'}">${escapeHtml(m.message)}<span class="ptime">${m.sender==='admin'?'Ադմին':'Դուք'} · ${time}</span></div>`;
+  }).join('');
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function updatePayStatusTag(status){
+  const tag = $("payStatusTag");
+  if(status==='approved'){
+    tag.className = 'pay-status-tag approved'; tag.textContent = '✅ Հաստատված է';
+    $("paymentChatHint").textContent = "Ձեր բաժանորդագրությունը հաստատված է։ Խաղը բացվում է...";
+  } else if(status==='rejected'){
+    tag.className = 'pay-status-tag rejected'; tag.textContent = '❌ Մերժված է';
+    $("paymentChatHint").textContent = "Ձեր հայտը մերժվել է։ Հարցերի դեպքում գրեք ադմինիստրատորին, կամ ուղարկեք նոր հայտ։";
+  } else {
+    tag.className = 'pay-status-tag pending'; tag.textContent = '⏳ Սպասման մեջ';
+    $("paymentChatHint").textContent = "Ադմինիստրատորը շուտով կպատասխանի։ Հաստատումից հետո խաղը ավտոմատ կբացվի։";
+  }
+}
+
+function subscribeToPaymentRequest(requestId){
+  if(payReqChannel){ try{ sb.removeChannel(payReqChannel); }catch(e){} payReqChannel=null; }
+  payReqChannel = sb.channel('pay-req-'+requestId)
+    .on('postgres_changes', { event:'UPDATE', schema:'public', table:'payment_requests', filter:`id=eq.${requestId}` }, (payload)=>{
+      const row = payload.new;
+      updatePayStatusTag(row.status);
+      if(row.status==='approved'){
+        mySubscription = { active:true, plan:row.plan, expiresAt:row.expires_at };
+        expiredPlanInfo = null;
+        sfx('win');
+        toast("✅ Ձեր բաժանորդագրությունը հաստատվեց։");
+        setTimeout(()=>{
+          closePaymentChat();
+          localStorage.removeItem('mafia_payment_request_id');
+          currentRequestId = null;
+          if(pendingAction){ const fn = pendingAction; pendingAction=null; fn(); }
+        }, 1200);
+      } else if(row.status==='rejected'){
+        toast("Ձեր հայտը մերժվեց ադմինիստրատորի կողմից։");
+        localStorage.removeItem('mafia_payment_request_id');
+        currentRequestId = null;
+      }
+    })
+    .subscribe();
+}
+
+function subscribeToPaymentMessages(requestId){
+  if(payMsgChannel){ try{ sb.removeChannel(payMsgChannel); }catch(e){} payMsgChannel=null; }
+  payMsgChannel = sb.channel('pay-msg-'+requestId)
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'payment_messages', filter:`request_id=eq.${requestId}` }, (payload)=>{
+      const m = payload.new;
+      const wrap = $("paymentChatMessages");
+      const time = new Date(m.created_at).toLocaleTimeString('hy-AM', {hour:'2-digit',minute:'2-digit'});
+      const div = document.createElement('div');
+      div.className = 'pay-msg ' + (m.sender==='admin'?'admin':'user');
+      div.innerHTML = `${escapeHtml(m.message)}<span class="ptime">${m.sender==='admin'?'Ադմին':'Դուք'} · ${time}</span>`;
+      wrap.appendChild(div);
+      wrap.scrollTop = wrap.scrollHeight;
+      if(m.sender==='admin') sfx('vote');
+    })
+    .subscribe();
+}
+
+$("btnSendPaymentMsg").addEventListener('click', sendPaymentChatMsg);
+$("paymentChatInput").addEventListener('keydown', (e)=>{ if(e.key==='Enter') sendPaymentChatMsg(); });
+async function sendPaymentChatMsg(){
+  const input = $("paymentChatInput");
+  const text = input.value.trim();
+  if(!text || !currentRequestId) return;
+  input.value = '';
+  try{
+    await sb.from('payment_messages').insert({ request_id: currentRequestId, sender:'user', message: text });
+  }catch(e){ console.error(e); toast("Հաղորդագրությունը չուղարկվեց։"); }
+}
+
+async function loadSubscriptionState(){
+  if(!sb) return;
+  try{
+    const { data, error } = await sb.from('payment_requests')
+      .select('*').eq('device_id', deviceId).order('created_at', {ascending:false}).limit(1);
+    if(error) throw error;
+    if(data && data.length){
+      const latest = data[0];
+      if(latest.status==='approved' && latest.expires_at && new Date(latest.expires_at) > new Date()){
+        mySubscription = { active:true, plan:latest.plan, expiresAt:latest.expires_at };
+      } else if(latest.status==='approved' && latest.expires_at && new Date(latest.expires_at) <= new Date()){
+        expiredPlanInfo = { plan: latest.plan, expiresAt: latest.expires_at };
+        localStorage.removeItem('mafia_payment_request_id');
+        currentRequestId = null;
+        const planTxt = planLabel(latest.plan);
+        toast(`⏳ Ձեր ${planTxt} փաթեթն ավարտվել է։ Նորոգեք բաժանորդագրությունը՝ խաղը շարունակելու համար։`, 5000);
+      } else if(latest.status==='pending'){
+        currentRequestId = latest.id;
+        localStorage.setItem('mafia_payment_request_id', currentRequestId);
+        subscribeToPaymentRequest(currentRequestId);
+        subscribeToPaymentMessages(currentRequestId);
+      } else {
+        localStorage.removeItem('mafia_payment_request_id');
+        currentRequestId = null;
+      }
+    }
+  }catch(e){ console.error('subscription check failed', e); }
+}
+
+/* ===================== CREATE / JOIN FLOWS ===================== */
+function performCreateGame(){
+  const name = $("landingName").value.trim();
+  if(!name){ toast("Գրեք ձեր անունը"); return; }
+  myName=name; sessionStorage.setItem('mafia_myName', name);
+  isHost = true;
+  const code = genRoomCode();
+  game = freshGame(code);
+  game.password = genRoomPassword();
+  game.players.push({id:myId, name:myName, role:null, alive:true, isHost:true});
+  sessionStorage.setItem('mafia_wasHost_'+code, '1');
+  connectToRoom(code, ()=>{
+    broadcastState();
+    showRoomUI();
+    render();
+  });
+  if(sb){
+    sb.from('active_rooms').upsert({ room_code: code, password: game.password, host_device_id: deviceId })
+      .then(({error})=>{ if(error) console.error('active_rooms upsert failed', error); });
+  }
+}
+$("btnCreateGame").addEventListener('click', ()=>{ requireSubscription('create', performCreateGame); });
+
+function performJoinGame(){
+  const name = $("landingName").value.trim();
+  const code = $("landingRoomCode").value.trim().toUpperCase();
+  if(!name){ toast("Գրեք ձեր անունը"); return; }
+  if(!code || code.length<4){ toast("Մուտքագրեք սենյակի կոդը"); return; }
+  myName=name; sessionStorage.setItem('mafia_myName', name);
+  isHost=false;
+  game = null;
+
+  const btn = $("btnJoinGame");
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = "🔎 Ստուգվում է սենյակը...";
+
+  connectToRoom(code, ()=>{
+    sendAction('ping-host', {});
+    const waitStart = Date.now();
+    const pingRetry = setInterval(()=>{ if(!game) sendAction('ping-host', {}); }, 1000);
+    const checkInterval = setInterval(()=>{
+      if(game){
+        clearInterval(checkInterval); clearInterval(pingRetry);
+        btn.disabled=false; btn.textContent=originalText;
+        if(game.players.length >= MAX_PLAYERS && !game.players.find(p=>p.id===myId)){
+          toast("Այս սենյակն արդեն լրված է (10/10)");
+          disconnectRoom();
+          return;
+        }
+        // If I was this room's host and my identity is already marked host in the
+        // received roster, reclaim host duties (e.g. after a refresh/reconnect).
+        const myEntry = game.players.find(p=>p.id===myId);
+        if(myEntry && myEntry.isHost){ isHost = true; }
+        showRoomUI();
+        render();
+        toast("Միացաք սենյակին։");
+      } else if(Date.now()-waitStart > 4000){
+        clearInterval(checkInterval); clearInterval(pingRetry);
+        btn.disabled=false; btn.textContent=originalText;
+        // Nobody answered. If I was the host of this room before, self-recover
+        // from my last known snapshot instead of losing the game entirely.
+        const wasHost = sessionStorage.getItem('mafia_wasHost_'+code)==='1';
+        const cached = sessionStorage.getItem('mafia_gamecache_'+code);
+        if(wasHost && cached){
+          try{
+            game = JSON.parse(cached);
+            isHost = true;
+            const meP = game.players.find(p=>p.id===myId);
+            if(meP) meP.isHost = true;
+            pushLog(`${myName} (խաղավար) վերականգնեց սենյակը վերջին հայտնի վիճակից։`);
+            broadcastState();
+            showRoomUI();
+            render();
+            toast("Սենյակը վերականգնվեց ձեր վերջին հայտնի վիճակից։");
+            return;
+          }catch(e){ /* fall through to failure */ }
+        }
+        toast("Այդպիսի սենյակ չի գտնվել կամ խաղավարը միացված չէ։ Ստուգեք կոդը։");
+        disconnectRoom();
+      }
+    }, 200);
+  });
+}
+async function attemptJoinGame(){
+  const name = $("landingName").value.trim();
+  const code = $("landingRoomCode").value.trim().toUpperCase();
+  const pass = $("landingRoomPassword").value.trim();
+  if(!name){ toast("Գրեք ձեր անունը"); return; }
+  if(!code || code.length<4){ toast("Մուտքագրեք սենյակի կոդը"); return; }
+
+  if(pass && sb){
+    try{
+      const { data, error } = await sb.from('active_rooms').select('password').eq('room_code', code).maybeSingle();
+      if(!error && data && data.password && data.password === pass){
+        performJoinGame(); // correct friend password → free entry, no subscription needed
+        return;
+      }
+      toast("Գաղտնաբառը սխալ է կամ սենյակն այլևս ակտիվ չէ։ Փորձում ենք սովորական մուտքով...");
+    }catch(e){ console.error('active_rooms lookup failed', e); }
+  }
+  requireSubscription('join', performJoinGame);
+}
+$("btnJoinGame").addEventListener('click', attemptJoinGame);
+
+function disconnectRoom(){
+  if(channel){ try{ channel.untrack(); }catch(e){} try{ sb.removeChannel(channel); }catch(e){} channel=null; }
+  cleanupVoice();
+  roomCode=null; game=null; isHost=false;
+  showScreen("screen-landing");
+  hideRoomUI();
+}
+
+function performLogout(){
+  if(!roomCode) return;
+  if(isHost && game && dirChannel){
+    try{ if(dirChannel.state==='joined') dirChannel.send({type:'broadcast', event:'room-closed', payload:{code:roomCode}}); }catch(e){}
+  }
+  if(isHost && sb && roomCode){
+    sb.from('active_rooms').delete().eq('room_code', roomCode).then(({error})=>{ if(error) console.error('active_rooms cleanup failed', error); });
+  }
+  sessionStorage.setItem('mafia_lastRoom', roomCode);
+  const leftCode = roomCode;
+  if(channel){ try{ channel.untrack(); }catch(e){} try{ sb.removeChannel(channel); }catch(e){} channel=null; }
+  cleanupVoice();
+  roomCode=null; game=null; isHost=false;
+  showScreen("screen-landing");
+  hideRoomUI();
+  $("landingRoomCode").value = leftCode || '';
+  toast("Դուրս եկաք սենյակից։ Կարող եք վերադառնալ նույն կոդով։");
+}
+$("logoutBtn").addEventListener('click', performLogout);
+
+function showRoomUI(){
+  $("lobbyRoomCode").textContent = roomCode;
+  const url = new URL(window.location.href);
+  url.searchParams.set('room', roomCode);
+  $("lobbyLink").value = url.toString();
+  $("chatToggle").style.display = 'inline-flex';
+  $("logoutBtn").style.display = 'inline-flex';
+  $("micBtn").style.display = 'flex';
+  $("micHint").style.display = 'block';
+}
+function hideRoomUI(){
+  $("chatToggle").style.display='none';
+  $("chatPanel").classList.remove('show');
+  $("logoutBtn").style.display='none';
+  $("micBtn").style.display='none';
+  $("micHint").style.display='none';
+}
+
+$("btnCopyCode").addEventListener('click', ()=>{
+  navigator.clipboard.writeText(roomCode).then(()=>toast("Կոդը կրկնօրինակված է"));
+});
+$("btnCopyLink").addEventListener('click', ()=>{
+  navigator.clipboard.writeText($("lobbyLink").value).then(()=>toast("Հղումը կրկնօրինակված է"));
+});
+$("btnCopyPassword").addEventListener('click', ()=>{
+  navigator.clipboard.writeText(game && game.password ? game.password : '').then(()=>toast("Գաղտնաբառը կրկնօրինակված է"));
+});
+
+$("btnStartGame").addEventListener('click', ()=>{
+  sendAction('start-game', {});
+});
+
+/* Auto-join via ?room=CODE link */
+window.addEventListener('DOMContentLoaded', ()=>{
+  const params = new URLSearchParams(window.location.search);
+  const roomParam = params.get('room');
+  if(roomParam){
+    $("landingRoomCode").value = roomParam.toUpperCase();
+  }
+  if(myName){ $("landingName").value = myName; }
+});
+
+/* ===================== RENDER ===================== */
+let lastPhaseRendered = null;
+let roleCardShown = false;
+
+function render(){
+  if(!game) return;
+  const myPlayer = me();
+  syncVoicePeers();
+
+  // ---- LOBBY ----
+  if(game.phase==='lobby'){
+    showScreen("screen-lobby");
+    $("playerCount").textContent = game.players.length;
+    $("playerGrid").innerHTML = game.players.map(p=>`
+      <div class="player-chip ${p.id===myId?'you':''} ${p.isHost?'host-chip':''}">
+        <div class="av">${initials(p.name)}</div>
+        <div>${escapeHtml(p.name)}${p.id===myId?' (Դուք)':''}</div>
+      </div>
+    `).join('');
+    const remaining = MAX_PLAYERS - game.players.length;
+    $("slotsLabel").textContent = game.players.length >= MAX_PLAYERS
+      ? "Բոլոր տեղերը զբաղված են!"
+      : `Կարող եք սկսել հենց հիմա, կամ սպասել ևս ${remaining} խաղացողի (առավելագույնը 10)...`;
+    const iAmHost = myPlayer && myPlayer.isHost;
+    $("hostOnlyLobby").style.display = iAmHost ? 'block':'none';
+    $("waitingForHostMsg").style.display = iAmHost ? 'none':'block';
+    if(iAmHost && game.password){
+      $("hostPasswordBox").style.display = 'flex';
+      $("hostPasswordHint").style.display = 'block';
+      $("lobbyRoomPassword").textContent = game.password;
+    } else {
+      $("hostPasswordBox").style.display = 'none';
+      $("hostPasswordHint").style.display = 'none';
+    }
+    $("btnStartGame").disabled = game.players.length < 1;
+    return;
+  }
+
+  // ---- REVEAL ----
+  if(game.phase==='reveal'){
+    showScreen("screen-role");
+    if(myPlayer && myPlayer.role && !roleCardShown){
+      const rd = ROLE_DEF[myPlayer.role];
+      $("roleIcon").textContent = rd.icon;
+      $("roleName").textContent = rd.name;
+      $("roleDesc").textContent = rd.desc;
+      $("roleTeamTag").textContent = rd.team==='black' ? "ՍԵՎ ԹԻՄ" : "ԿԱՐՄԻՐ ԹԻՄ";
+      $("roleTeamTag").className = "role-team-tag "+rd.team;
+    }
+    return;
+  }
+
+  // ---- NIGHT / DAY / gameplay ----
+  if(game.phase==='night' || game.phase==='day'){
+    showScreen("screen-game");
+    setDayMode(game.phase==='day');
+    if(lastPhaseRendered!==game.phase){
+      sfx(game.phase==='night' ? 'night' : 'day');
+      lastPhaseRendered = game.phase;
+    }
+    $("phaseIcon").textContent = game.phase==='night' ? "🌙" : "☀️";
+    $("phaseLabel").textContent = game.phase==='night'
+      ? `Գիշեր · Օր ${game.dayNumber}`
+      : `Ցերեկ · Օր ${game.dayNumber}`;
+
+    const alive = amIAlive();
+    $("eliminatedBanner").style.display = alive ? 'none' : 'block';
+
+    // reset sub-views
+    $("nightSleepView").style.display='none';
+    $("mafiaActionView").style.display='none';
+    $("sheriffActionView").style.display='none';
+    $("dayView").style.display='none';
+
+    if(game.phase==='night'){
+      paintStars();
+      const role = myPlayer ? myPlayer.role : null;
+      if(alive && (role==='mafia' || role==='don')){
+        renderMafiaView();
+      } else if(alive && role==='sheriff'){
+        renderSheriffView();
+      } else {
+        $("nightSleepView").style.display='block';
+      }
+    } else {
+      renderDayView();
+    }
+
+    // game log
+    $("gameLog").innerHTML = game.log.slice(-40).map(l=>`<p>${escapeHtml(l)}</p>`).join('') || '<p class="muted">—</p>';
+    $("gameLog").scrollTop = $("gameLog").scrollHeight;
+
+    // dead strip
+    const dead = game.players.filter(p=>!p.alive);
+    $("deadStrip").innerHTML = dead.length
+      ? dead.map(p=>`<span>☠️ ${escapeHtml(p.name)}</span>`).join('')
+      : '<span class="muted" style="background:none;border:none;">Դեռ ոչ ոք</span>';
+
+    // host controls
+    const iAmHost = myPlayer && myPlayer.isHost;
+    $("hostOnlyGame").style.display = iAmHost ? 'block' : 'none';
+    if(iAmHost){
+      $("btnTogglePhase").textContent = game.phase==='night' ? "☀️ Անցնել Ցերեկվա" : "🌙 Անցնել Գիշերվա";
+    }
+    return;
+  }
+
+  // ---- ENDED ----
+  if(game.phase==='ended'){
+    showScreen("screen-win");
+    setDayMode(true);
+    if(game.winner){
+      const redWin = game.winner==='red';
+      $("winIcon").textContent = redWin ? "🔴" : "⚫";
+      $("winTitle").textContent = redWin ? "Կարմիրները հաղթեցին!" : "Մաֆիան հաղթեց!";
+      $("winSubtitle").textContent = redWin ? "Քաղաքը մաքրվեց մաֆիայից։" : "Մաֆիան վերահսկողության տակ վերցրեց քաղաքը։";
+      $("finalRolesList").innerHTML = game.players.map(p=>{
+        const rd = ROLE_DEF[p.role] || {icon:'❔',name:'—'};
+        return `<div class="mrow"><span>${rd.icon} ${escapeHtml(p.name)}</span><span>${rd.name}${p.alive?'':' · ☠️'}</span></div>`;
+      }).join('');
+      if(lastPhaseRendered!=='ended'){ sfx('win'); launchConfetti(); }
+    } else {
+      $("winIcon").textContent = "⏹️";
+      $("winTitle").textContent = "Խաղն ավարտվեց";
+      $("winSubtitle").textContent = "Խաղավարը դադարեցրեց խաղը։";
+      $("finalRolesList").innerHTML = '';
+    }
+    lastPhaseRendered='ended';
+    const iAmHost = myPlayer && myPlayer.isHost;
+    $("hostOnlyWin").style.display = iAmHost ? 'block':'none';
+    return;
+  }
+}
+
+function renderMafiaView(){
+  $("mafiaActionView").style.display='block';
+  const targets = game.players.filter(p=>p.alive && p.role!=='mafia' && p.role!=='don');
+  const myVote = game.nightActions.mafiaVotes[myId];
+  const voteCounts = {};
+  Object.values(game.nightActions.mafiaVotes).forEach(t=>voteCounts[t]=(voteCounts[t]||0)+1);
+  $("mafiaTargetList").innerHTML = targets.map(p=>`
+    <div class="target-row selectable ${myVote===p.id?'selected':''}" data-id="${p.id}">
+      <div class="av">${initials(p.name)}</div>
+      <div class="name">${escapeHtml(p.name)}</div>
+      ${voteCounts[p.id] ? `<div class="vote-count">${voteCounts[p.id]} ձայն</div>` : ''}
+    </div>
+  `).join('');
+  $("mafiaTargetList").querySelectorAll('.target-row').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      sfx('vote');
+      sendAction('mafia-vote', {targetId: row.dataset.id});
+    });
+  });
+  const teammatesAlive = game.players.filter(p=>p.alive && (p.role==='mafia'||p.role==='don')).length;
+  $("mafiaVoteStatus").textContent = myVote
+    ? `Դուք ընտրեցիք ${game.players.find(p=>p.id===myVote)?.name}-ին։ Սպասվում է մյուսների որոշումը (${Object.keys(game.nightActions.mafiaVotes).length}/${teammatesAlive})...`
+    : "Ընտրեք զոհ ձեր թիմի հետ։";
+}
+
+function renderSheriffView(){
+  $("sheriffActionView").style.display='block';
+  const targets = game.players.filter(p=>p.alive && p.id!==myId);
+  const already = !!game.nightActions.sheriffTarget;
+  $("sheriffTargetList").innerHTML = targets.map(p=>`
+    <div class="target-row ${already?'':'selectable'} ${game.nightActions.sheriffTarget===p.id?'selected':''}" data-id="${p.id}">
+      <div class="av">${initials(p.name)}</div>
+      <div class="name">${escapeHtml(p.name)}</div>
+    </div>
+  `).join('');
+  if(!already){
+    $("sheriffTargetList").querySelectorAll('.target-row').forEach(row=>{
+      row.addEventListener('click', ()=>{
+        sfx('vote');
+        sendAction('sheriff-check', {targetId: row.dataset.id});
+      });
+    });
+    $("sheriffResultMsg").textContent = "";
+  } else if(game.nightActions.sheriffResultFor===myId){
+    const target = game.players.find(p=>p.id===game.nightActions.sheriffTarget);
+    $("sheriffResultMsg").textContent = `Արդյունք՝ ${target?.name} → ${game.nightActions.sheriffResultAnswer}`;
+  } else {
+    $("sheriffResultMsg").textContent = "Ստուգումն ուղարկված է։";
+  }
+}
+
+function renderDayView(){
+  $("dayView").style.display='block';
+  $("nightResultLog").innerHTML = game.lastNightDeaths.length
+    ? game.lastNightDeaths.map(n=>`<p>☠️ ${escapeHtml(n)} սպանվել է գիշերը։</p>`).join('')
+    : '<p>🌙 Այս գիշեր ոչ ոք չի սպանվել։</p>';
+
+  const alive = game.players.filter(p=>p.alive);
+  const myVote = game.dayVotes[myId];
+  const voteCounts={};
+  Object.values(game.dayVotes).forEach(t=>voteCounts[t]=(voteCounts[t]||0)+1);
+  const canVote = amIAlive();
+  $("dayVoteList").innerHTML = alive.filter(p=>p.id!==myId || true).map(p=>`
+    <div class="target-row ${canVote && !myVote ? 'selectable':''} ${myVote===p.id?'selected':''}" data-id="${p.id}">
+      <div class="av">${initials(p.name)}</div>
+      <div class="name">${escapeHtml(p.name)}</div>
+      ${voteCounts[p.id] ? `<div class="vote-count">${voteCounts[p.id]} ձայն</div>` : ''}
+    </div>
+  `).join('');
+  if(canVote && !myVote){
+    $("dayVoteList").querySelectorAll('.target-row').forEach(row=>{
+      row.addEventListener('click', ()=>{
+        sfx('vote');
+        sendAction('day-vote', {targetId: row.dataset.id});
+      });
+    });
+  }
+  $("dayVoteStatus").textContent = !canVote
+    ? "Դուք հեռացված եք և չեք կարող քվեարկել։"
+    : myVote
+      ? `Դուք քվեարկեցիք։ (${Object.keys(game.dayVotes).length}/${alive.length})`
+      : "Ընտրեք ում ուզում եք հեռացնել։";
+}
+
+function escapeHtml(str){
+  return (str||"").replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+/* ===================== ROLE CARD FLIP ===================== */
+$("roleCard3d").addEventListener('click', ()=>{
+  if(!$("roleCard3d").classList.contains('flipped')){
+    $("roleCard3d").classList.add('flipped');
+    sfx('flip');
+    $("btnRoleContinue").style.display='inline-block';
+    roleCardShown = true;
+  }
+});
+$("btnRoleContinue").addEventListener('click', ()=>{
+  // client just waits — host auto-advances to night after a timer,
+  // but if state already moved on, render() will pick it up.
+  toast("Սպասում ենք մյուս խաղացողներին...");
+});
+
+/* ===================== HOST BUTTONS ===================== */
+$("btnTogglePhase").addEventListener('click', ()=> sendAction('toggle-phase', {}));
+$("btnEndGame").addEventListener('click', ()=>{
+  if(confirm("Ավարտե՞լ խաղը հիմա։")) sendAction('end-game', {});
+});
+$("btnReplaySame").addEventListener('click', ()=> sendAction('replay-same', {}));
+$("btnNewGame").addEventListener('click', ()=>{
+  sendAction('new-game', {});
+  setTimeout(()=>{ showScreen('screen-lobby'); }, 300);
+});
+
+/* ===================== CHAT ===================== */
+function renderChat(){
+  const box = $("chatMessages");
+  box.innerHTML = chatMessages.map(m=>{
+    const senderAlive = game && game.players.find(p=>p.id===m.from);
+    const isDead = senderAlive && !senderAlive.alive;
+    return `<div class="chat-msg ${m.from===myId?'me':''} ${isDead?'dead-msg':''}">
+      <div class="cname">${escapeHtml(m.name)}</div>
+      <div class="ctext">${escapeHtml(m.text)}</div>
+    </div>`;
+  }).join('') || '<p class="muted" style="font-size:12px;">Դեռ հաղորդագրություններ չկան</p>';
+  box.scrollTop = box.scrollHeight;
+}
+function updateChatBadge(){
+  const b = $("chatBadge");
+  if(unreadChat>0){ b.style.display='inline-block'; b.textContent = unreadChat>9?'9+':unreadChat; }
+  else{ b.style.display='none'; }
+}
+function sendChat(){
+  const input = $("chatInput");
+  const text = input.value.trim();
+  if(!text || !channel) return;
+  safeSend(channel, {type:'broadcast', event:'chat', payload:{from:myId, name:myName, text, ts:Date.now()}});
+  input.value='';
+}
+$("chatSendBtn").addEventListener('click', sendChat);
+$("chatInput").addEventListener('keydown', (e)=>{ if(e.key==='Enter') sendChat(); });
+$("chatToggle").addEventListener('click', ()=>{
+  $("chatPanel").classList.toggle('show');
+  if($("chatPanel").classList.contains('show')){
+    unreadChat=0; updateChatBadge(); renderChat();
+  }
+});
+
+/* ===================== NOTES (LOCAL ONLY, NEVER SYNCED) ===================== */
+function notesKey(){ return 'mafia_notes_'+(roomCode||'global'); }
+$("notesToggle").addEventListener('click', ()=>{
+  $("notesPanel").classList.toggle('show');
+  $("notesArea").value = sessionStorage.getItem(notesKey()) || "";
+});
+$("btnCloseNotes").addEventListener('click', ()=> $("notesPanel").classList.remove('show'));
+$("notesArea").addEventListener('input', ()=>{
+  sessionStorage.setItem(notesKey(), $("notesArea").value);
+});
+
+/* ===================== SAFETY NET ===================== */
+function revealLandingAfterCrash(detail){
+  const ls = document.getElementById('loadingScreen');
+  if(ls && ls.style.display!=='none'){
+    ls.style.opacity='0';
+    setTimeout(()=>ls.style.display='none', 400);
+  }
+  const landing = document.getElementById('screen-landing');
+  if(landing && !landing.classList.contains('active')){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    landing.classList.add('active');
+  }
+  console.error('Mafia app error:', detail);
+  const w = document.getElementById('configWarning');
+  if(w){ w.style.display='block'; w.textContent = "⚠ Տեխնիկական սխալ. " + detail; }
+}
+window.addEventListener('error', (e)=>{
+  const detail = e.message + (e.filename ? ` (${e.filename.split('/').pop()}:${e.lineno}:${e.colno})` : '') + (e.error && e.error.stack ? '\n'+e.error.stack : '');
+  revealLandingAfterCrash(detail);
+});
+window.addEventListener('unhandledrejection', (e)=>{
+  const reason = e.reason && (e.reason.message || e.reason.toString ? e.reason.toString() : e.reason);
+  revealLandingAfterCrash('Promise rejection: ' + reason);
+});
+
+/* ===================== ACTIVE ROOMS DIRECTORY ===================== */
+function setupDirectory(){
+  dirChannel = sb.channel("mafia-directory", { config:{ broadcast:{ self:false } } });
+  dirChannel.on('broadcast', {event:'room-announce'}, ({payload})=>{
+    activeRooms[payload.code] = {...payload, lastSeen: Date.now()};
+    renderActiveRooms();
+  });
+  dirChannel.on('broadcast', {event:'room-closed'}, ({payload})=>{
+    delete activeRooms[payload.code];
+    renderActiveRooms();
+  });
+  dirChannel.subscribe();
+
+  // Periodically drop rooms we haven't heard from in a while (host gone / stale)
+  setInterval(()=>{
+    const now = Date.now();
+    let changed=false;
+    Object.keys(activeRooms).forEach(code=>{
+      if(now - activeRooms[code].lastSeen > 8000){ delete activeRooms[code]; changed=true; }
+    });
+    if(changed) renderActiveRooms();
+  }, 3000);
+
+  // Heartbeat: hosts keep re-announcing their open lobby every few seconds
+  setInterval(()=>{
+    if(isHost && game && roomCode) updateDirectory();
+  }, 4000);
+}
+
+function renderActiveRooms(){
+  const wrap = $("activeRoomsList");
+  if(!wrap) return;
+  const codes = Object.keys(activeRooms);
+  if(!codes.length){
+    wrap.innerHTML = '<p class="muted center-text" style="font-size:13px;">Ակտիվ սենյակներ չկան այս պահին</p>';
+    return;
+  }
+  wrap.innerHTML = codes.map(code=>{
+    const r = activeRooms[code];
+    return `<div class="room-list-item" data-code="${escapeHtml(code)}">
+      <div>
+        <strong>${escapeHtml(code)}</strong>
+        <div class="muted" style="font-size:11px;">Խաղավար՝ ${escapeHtml(r.hostName||'—')}</div>
+      </div>
+      <span class="badge">${r.playerCount}/10</span>
+    </div>`;
+  }).join('');
+  wrap.querySelectorAll('.room-list-item').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      $("landingRoomCode").value = el.dataset.code;
+      if(!$("landingName").value.trim()){ toast("Նախ գրեք ձեր անունը"); return; }
+      $("btnJoinGame").click();
+    });
+  });
+}
+
+/* ===================== VOICE CHAT (WebRTC mesh, push-to-talk) =====================
+   Signaling travels over the same room broadcast channel (event 'voice-signal').
+   Audio is peer-to-peer (mesh) — fine for small groups (up to 10). Requires a
+   secure context (https or localhost); browsers block microphone access on file://
+   and plain http, same limitation as Realtime itself. Uses a public STUN server
+   only (no TURN), so it may not connect across very restrictive NATs/firewalls. */
+const ICE_SERVERS = [{urls:'stun:stun.l.google.com:19302'}];
+
+function syncVoicePeers(){
+  if(!game || !channel) return;
+  const ids = game.players.map(p=>p.id).filter(id=>id!==myId);
+  ids.forEach(id=>{
+    if(!peers[id]) createPeerConnection(id, myId < id);
+  });
+  Object.keys(peers).forEach(id=>{
+    if(!ids.includes(id)) closePeer(id);
+  });
+}
+
+function createPeerConnection(peerId, isInitiator){
+  const pc = new RTCPeerConnection({iceServers: ICE_SERVERS});
+  peers[peerId] = pc;
+
+  if(localStream){
+    localStream.getTracks().forEach(t=>pc.addTrack(t, localStream));
+  }
+
+  pc.onicecandidate = (e)=>{
+    if(e.candidate) sendVoiceSignal(peerId, {kind:'candidate', candidate: e.candidate});
+  };
+  pc.ontrack = (e)=>{
+    attachRemoteAudio(peerId, e.streams[0]);
+  };
+  if(isInitiator){
+    pc.onnegotiationneeded = async ()=>{
+      try{
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        sendVoiceSignal(peerId, {kind:'offer', sdp: pc.localDescription});
+      }catch(e){ console.error('voice offer error', e); }
+    };
+  }
+  return pc;
+}
+
+async function handleVoiceSignal(payload){
+  const {from, kind, sdp, candidate} = payload;
+  let pc = peers[from];
+  if(!pc){ pc = createPeerConnection(from, false); }
+  try{
+    if(kind==='offer'){
+      await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      sendVoiceSignal(from, {kind:'answer', sdp: pc.localDescription});
+    } else if(kind==='answer'){
+      await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+    } else if(kind==='candidate'){
+      await pc.addIceCandidate(candidate);
+    }
+  }catch(e){ console.error('voice signal error', e); }
+}
+
+function sendVoiceSignal(to, data){
+  if(!channel) return;
+  safeSend(channel, {type:'broadcast', event:'voice-signal', payload:{to, from:myId, ...data}});
+}
+
+function attachRemoteAudio(peerId, stream){
+  let audioEl = document.getElementById('voice-audio-'+peerId);
+  if(!audioEl){
+    audioEl = document.createElement('audio');
+    audioEl.id = 'voice-audio-'+peerId;
+    audioEl.autoplay = true;
+    audioEl.style.display = 'none';
+    document.body.appendChild(audioEl);
+  }
+  audioEl.srcObject = stream;
+}
+
+function closePeer(peerId){
+  const pc = peers[peerId];
+  if(pc){ try{ pc.close(); }catch(e){} delete peers[peerId]; }
+  const audioEl = document.getElementById('voice-audio-'+peerId);
+  if(audioEl) audioEl.remove();
+}
+
+function cleanupVoice(){
+  Object.keys(peers).forEach(closePeer);
+  if(localStream){ localStream.getTracks().forEach(t=>t.stop()); localStream=null; }
+  $("micBtn").classList.remove('talking');
+}
+
+async function ensureLocalStream(){
+  if(localStream) return localStream;
+  try{
+    localStream = await navigator.mediaDevices.getUserMedia({audio:true});
+    localStream.getAudioTracks().forEach(t=> t.enabled=false); // muted by default (push-to-talk)
+    Object.values(peers).forEach(pc=>{
+      localStream.getTracks().forEach(t=>pc.addTrack(t, localStream));
+    });
+  }catch(e){
+    toast("Չհաջողվեց մուտք ստանալ մայքրոֆոնին։ Ստուգեք browser-ի թույլտվությունները։");
+  }
+  return localStream;
+}
+
+async function startTalk(){
+  await ensureLocalStream();
+  if(localStream){
+    localStream.getAudioTracks().forEach(t=>t.enabled=true);
+    $("micBtn").classList.add('talking');
+  }
+}
+function stopTalk(){
+  if(localStream){ localStream.getAudioTracks().forEach(t=>t.enabled=false); }
+  $("micBtn").classList.remove('talking');
+}
+$("micBtn").addEventListener('mousedown', startTalk);
+$("micBtn").addEventListener('mouseup', stopTalk);
+$("micBtn").addEventListener('mouseleave', stopTalk);
+$("micBtn").addEventListener('touchstart', (e)=>{ e.preventDefault(); startTalk(); });
+$("micBtn").addEventListener('touchend', (e)=>{ e.preventDefault(); stopTalk(); });
+
+/* ===================== BOOT ===================== */
+(function boot(){
+  let ok = false;
+  try{
+    ok = initSupabase();
+  }catch(e){
+    console.error(e);
+    $("configWarning").style.display='block';
+    $("configWarning").textContent = "⚠ Սխալ Supabase-ը միացնելիս։ Ստուգեք URL/key-երը։";
+  }
+  if(ok){
+    try{ setupDirectory(); }catch(e){ console.error(e); }
+    try{ loadSubscriptionState(); }catch(e){ console.error(e); }
+  }
+  setTimeout(()=>{
+    $("loadingScreen").style.opacity='0';
+    setTimeout(()=>$("loadingScreen").style.display='none', 500);
+  }, 700);
+  showScreen("screen-landing");
+})();
+
+window.addEventListener('beforeunload', ()=>{
+  if(isHost && game && dirChannel && roomCode){
+    try{ if(dirChannel.state==='joined') dirChannel.send({type:'broadcast', event:'room-closed', payload:{code:roomCode}}); }catch(e){}
+  }
+});
+</script>
+</body>
+</html>
