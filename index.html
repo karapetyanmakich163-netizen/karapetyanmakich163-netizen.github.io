@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ՄԱՖԻԱ | Իրական ժամանակի խաղ</title>
+<!-- Google AdSense site verification (H5 Games Ads setup in progress) -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4905972236238447" crossorigin="anonymous"></script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2222%22%20fill%3D%22%230a0908%22/%3E%3Crect%20x%3D%223%22%20y%3D%223%22%20width%3D%2294%22%20height%3D%2294%22%20rx%3D%2220%22%20fill%3D%22none%22%20stroke%3D%22%23d4af37%22%20stroke-width%3D%223%22/%3E%3Ctext%20x%3D%2250%22%20y%3D%2270%22%20font-size%3D%2258%22%20text-anchor%3D%22middle%22%3E%F0%9F%8E%AD%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Rubik:wght@400;500;600;700&family=Noto+Serif+Armenian:wght@500;600;700;900&family=Noto+Sans+Armenian:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1375,7 +1377,7 @@ function renderPaymentChat(messages){
   const wrap = $("paymentChatMessages");
   wrap.innerHTML = messages.map(m=>{
     const time = new Date(m.created_at).toLocaleTimeString('hy-AM', {hour:'2-digit',minute:'2-digit'});
-    return `<div class="pay-msg ${m.sender==='admin'?'admin':'user'}">${escapeHtml(m.message)}<span class="ptime">${m.sender==='admin'?'Ադմին':'Դուք'} · ${time}</span></div>`;
+    return `<div class="pay-msg ${m.sender==='admin'?'admin':'user'}" data-msg-id="${m.id}">${escapeHtml(m.message)}<span class="ptime">${m.sender==='admin'?'Ադմին':'Դուք'} · ${time}</span></div>`;
   }).join('');
   wrap.scrollTop = wrap.scrollHeight;
 }
@@ -1429,10 +1431,15 @@ function subscribeToPaymentMessages(requestId){
       const time = new Date(m.created_at).toLocaleTimeString('hy-AM', {hour:'2-digit',minute:'2-digit'});
       const div = document.createElement('div');
       div.className = 'pay-msg ' + (m.sender==='admin'?'admin':'user');
+      div.dataset.msgId = m.id;
       div.innerHTML = `${escapeHtml(m.message)}<span class="ptime">${m.sender==='admin'?'Ադմին':'Դուք'} · ${time}</span>`;
       wrap.appendChild(div);
       wrap.scrollTop = wrap.scrollHeight;
       if(m.sender==='admin') sfx('vote');
+    })
+    .on('postgres_changes', { event:'DELETE', schema:'public', table:'payment_messages', filter:`request_id=eq.${requestId}` }, (payload)=>{
+      const el = $("paymentChatMessages").querySelector(`[data-msg-id="${payload.old.id}"]`);
+      if(el) el.remove();
     })
     .subscribe();
 }
