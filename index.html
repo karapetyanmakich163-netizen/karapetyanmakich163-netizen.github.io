@@ -5,7 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ՄԱՖԻԱ | Իրական ժամանակի խաղ</title>
 <!-- Google AdSense site verification (H5 Games Ads setup in progress) -->
+<!-- Google AdSense + H5 Games Ads API -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4905972236238447" crossorigin="anonymous"></script>
+<script>
+  window.adsbygoogle = window.adsbygoogle || [];
+  var adBreak = adConfig = function(o){adsbygoogle.push(o);};
+</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2222%22%20fill%3D%22%230a0908%22/%3E%3Crect%20x%3D%223%22%20y%3D%223%22%20width%3D%2294%22%20height%3D%2294%22%20rx%3D%2220%22%20fill%3D%22none%22%20stroke%3D%22%23d4af37%22%20stroke-width%3D%223%22/%3E%3Ctext%20x%3D%2250%22%20y%3D%2270%22%20font-size%3D%2258%22%20text-anchor%3D%22middle%22%3E%F0%9F%8E%AD%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Rubik:wght@400;500;600;700&family=Noto+Serif+Armenian:wght@500;600;700;900&family=Noto+Sans+Armenian:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -300,6 +305,34 @@ body.day-mode #notesArea{background:#fff;}
 footer.small{margin-top:30px; text-align:center; color:var(--grey); font-size:11px; letter-spacing:.08em;}
 .sound-toggle{position:fixed; left:16px; bottom:16px; z-index:60; border-radius:50%; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:18px; box-shadow:0 8px 24px rgba(0,0,0,.5);}
 
+/* ============================= LANGUAGE + OFFLINE ============================= */
+.lang-wrap{position:fixed; top:16px; left:16px; z-index:80;}
+.lang-btn{
+  border:1px solid rgba(212,175,55,.35); background:rgba(20,18,16,.85); color:var(--gold-2);
+  border-radius:50px; padding:10px 14px; font-size:13px; font-weight:600; cursor:pointer;
+  box-shadow:0 8px 24px rgba(0,0,0,.4); backdrop-filter:blur(6px);
+}
+body.day-mode .lang-btn{background:rgba(251,248,240,.92); color:var(--day-ink); border-color:rgba(161,18,31,.25);}
+.lang-menu{
+  display:none; position:absolute; top:calc(100% + 8px); left:0; min-width:160px;
+  background:var(--black-2); border:1px solid var(--gold); border-radius:12px; padding:8px;
+  box-shadow:var(--shadow-deep); flex-direction:column; gap:4px;
+}
+body.day-mode .lang-menu{background:var(--day-panel);}
+.lang-menu.show{display:flex;}
+.lang-menu button{
+  border:none; background:transparent; color:inherit; text-align:left; padding:10px 12px;
+  border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; width:100%;
+}
+.lang-menu button:hover, .lang-menu button.active{background:rgba(212,175,55,.15);}
+.ad-top-slot{
+  width:100%; max-width:760px; min-height:0; margin:0 auto 12px; display:flex; justify-content:center;
+  overflow:hidden;
+}
+#offlineOverlay .card{max-width:360px; text-align:center;}
+.offline-icons{font-size:48px; line-height:1.2; margin:8px 0 12px;}
+.offline-icons span{display:inline-block; margin:0 6px;}
+
 /* ============================= CHAT ============================= */
 #chatToggle{position:fixed; left:16px; bottom:76px; z-index:60; border-radius:50px; padding:12px 16px; font-size:13px; box-shadow:0 8px 24px rgba(0,0,0,.5); display:none;}
 #chatToggle .badge-count{background:var(--red); color:#fff; font-size:11px; font-weight:700; border-radius:10px; padding:1px 7px; margin-left:6px; display:none;}
@@ -350,6 +383,7 @@ body.day-mode .room-list-item{background:rgba(161,18,31,.04);}
   display:none; align-items:center; justify-content:center; padding:18px; overflow-y:auto;
 }
 .overlay.show{display:flex;}
+#paywallOverlay, #paymentChatOverlay{display:none !important;} /* game is free */
 .overlay .card{width:100%; max-width:440px; max-height:92vh; overflow-y:auto; margin:auto;}
 .plan-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:18px 0 6px;}
 .plan-card{
@@ -407,7 +441,27 @@ body.day-mode .plan-card{background:rgba(0,0,0,.03);}
 <div id="micHint">Սեղմած պահեք՝ խոսելու համար</div>
 <button id="micBtn" title="Սեղմած պահեք՝ խոսելու համար">🎤</button>
 
+<div class="lang-wrap">
+  <button class="lang-btn" id="langBtn" type="button">🌐 Լեզու</button>
+  <div class="lang-menu" id="langMenu">
+    <button type="button" data-lang="hy" class="active">🇦🇲 Հայերեն</button>
+    <button type="button" data-lang="ru">🇷🇺 Русский</button>
+    <button type="button" data-lang="en">🇬🇧 English</button>
+  </div>
+</div>
+
+<!-- Offline / no-internet popup for ads -->
+<div class="overlay" id="offlineOverlay">
+  <div class="card">
+    <div class="offline-icons"><span>📶</span><span>❌</span></div>
+    <h2 id="offlineTitle" style="margin:0 0 8px;">Ինտերնետ կապ չկա</h2>
+    <p class="muted" id="offlineMsg">Գովազդը ցուցադրելու համար միացրեք Wi-Fi-ը կամ բջջային ինտերնետը։</p>
+    <button class="btn btn-primary btn-block" id="btnOfflineRetry" style="margin-top:16px;">Փորձել կրկին</button>
+  </div>
+</div>
+
 <div id="app">
+  <div class="ad-top-slot" id="adTopSlot" aria-hidden="true"></div>
 
   <div class="brand">
     <svg class="brand-art" viewBox="0 0 900 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Մաֆիա խաղի նկար՝ գլխարկ, դիմակ և գիշերային քաղաքի սիլուետ">
@@ -773,12 +827,358 @@ const SUPABASE_ANON_KEY = "sb_publishable_Sjgo0uZgfTtaB1ljkh9bdw_DA77GzHz";
 
 /* ===================== CONSTANTS ===================== */
 const MAX_PLAYERS = 10;
-const ROLE_DEF = {
-  citizen: {icon:"🔴", name:"Խաղաղ բնակիչ", team:"red", desc:"Դուք քաղաքի խաղաղ բնակիչ եք։ Ձեր նպատակն է հայտնաբերել և հեռացնել մաֆիային ցերեկային քվեարկությամբ։"},
-  mafia:   {icon:"⚫", name:"Մաֆիա",         team:"black", desc:"Դուք մաֆիայի անդամ եք։ Գիշերը դոնի հետ միասին ընտրեք զոհ։ Թաքցրեք ձեր դերը ցերեկը։"},
-  sheriff: {icon:"⭐", name:"Շերիֆ",         team:"red", desc:"Դուք շերիֆն եք։ Ամեն գիշեր կարող եք ստուգել մեկ խաղացողի և իմանալ՝ նա Սև է, թե Կարմիր։"},
-  don:     {icon:"👑", name:"Դոն",           team:"black", desc:"Դուք մաֆիայի դոնն եք։ Դուք էլ եք ընտրում զոհին գիշերը, մաֆիաների հետ միասին։"}
+
+/* ===================== i18n ===================== */
+let currentLang = localStorage.getItem('mafia_lang') || 'hy';
+const translations = {
+  hy: {
+    title: "ՄԱՖԻԱ | Իրական ժամանակի խաղ",
+    brandSub: "Realtime Multiplayer",
+    loading: "Կապվում ենք սերվերի հետ...",
+    welcome: "Բարի գալուստ",
+    welcomeHint: "Ստեղծիր սենյակ կամ միացիր ընկերներիդ խաղին",
+    yourName: "Քո անունը",
+    namePlaceholder: "օր. Արամ",
+    createGame: "🎲 Ստեղծել խաղ",
+    or: "կամ",
+    roomCode: "Սենյակի կոդ",
+    roomCodePlaceholder: "օր. A1B2C3",
+    friendPassword: "Ընկերոջ գաղտնաբառ (եթե ունես՝ արագ մուտք)",
+    passwordPlaceholder: "օր. 4821",
+    joinGame: "🚪 Միանալ խաղին",
+    activeRooms: "🎮 Ակտիվ սենյակներ",
+    searchingRooms: "Փնտրում ենք ակտիվ սենյակներ...",
+    noActiveRooms: "Ակտիվ սենյակներ չկան այս պահին",
+    footer: "10 խաղացող · Իրական ժամանակի սինխրոնացում · Supabase Realtime",
+    lobby: "Սպասասրահ",
+    roomCodeLabel: "Սենյակի կոդ",
+    copy: "📋 Կրկնօրինակել",
+    friendPassLabel: "🔑 Ընկերոջ գաղտնաբառ (արագ մուտք)",
+    friendPassHint: "Այս գաղտնաբառով ցանկացած ընկեր կարող է մտնել ձեր սենյակը։ Կիսվեք միայն վստահելի մարդկանց հետ։",
+    players: "👥 Խաղացողներ",
+    hostControls: "👑 Խաղավարի կառավարում",
+    startGame: "▶️ Սկսել խաղը",
+    waitingHost: "Սպասում ենք, մինչև խաղավարը սկսի խաղը...",
+    yourRole: "Ձեր դերը",
+    tapCard: "Հպեք քարտին՝ բացելու համար",
+    continue: "Շարունակել →",
+    eliminated: "Դուք դուրս եք մնացել խաղից",
+    eliminatedHint: "Դուք այլևս չեք կարող քվեարկել կամ գործողություն կատարել, բայց կարող եք հետևել խաղին։",
+    citySleeps: "Քաղաքը քնած է...",
+    mafiaActs: "Մաֆիան և շերիֆը գործում են ստվերում։",
+    chooseVictim: "⚫ Ընտրեք զոհին",
+    chooseCheck: "⭐ Ընտրեք ստուգելու խաղացողին",
+    nightResult: "📜 Գիշերվա արդյունքը",
+    voting: "🗳️ Քվեարկություն",
+    gameLog: "📜 Խաղի ընթացք",
+    eliminatedList: "☠️ Հեռացվածներ",
+    nobodyYet: "Դեռ ոչ ոք",
+    goNight: "🌙 Անցնել Գիշերվա",
+    goDay: "☀️ Անցնել Ցերեկվա",
+    endGame: "⏹️ Ավարտել խաղը",
+    win: "Հաղթանակ!",
+    redWon: "Կարմիրները հաղթեցին!",
+    blackWon: "Մաֆիան հաղթեց!",
+    redWonSub: "Քաղաքը մաքրվեց մաֆիայից։",
+    blackWonSub: "Մաֆիան վերահսկողության տակ վերցրեց քաղաքը։",
+    gameEnded: "Խաղն ավարտվեց",
+    hostEnded: "Խաղավարը դադարեցրեց խաղը։",
+    replaySame: "🔁 Վերախաղալ նույն կազմով",
+    newGame: "🔄 Նոր խաղ",
+    chat: "💬 Չաթ",
+    roomChat: "💬 Սենյակի չաթը",
+    chatPlaceholder: "Գրեք հաղորդագրություն...",
+    myNotes: "📝 Իմ նշումները",
+    notesTitle: "📝 Իմ նկատողությունները",
+    notesPlaceholder: "Գրեք ձեր դիտարկումները այստեղ... (տեսանելի է միայն ձեզ)",
+    close: "Փակել",
+    logout: "🚪 Դուրս գալ",
+    micHint: "Սեղմած պահեք՝ խոսելու համար",
+    enterName: "Գրեք ձեր անունը",
+    enterRoomCode: "Մուտքագրեք սենյակի կոդը",
+    wrongPassword: "Գաղտնաբառը սխալ է կամ սենյակն այլևս ակտիվ չէ։",
+    codeCopied: "Կոդը կրկնօրինակված է",
+    linkCopied: "Հղումը կրկնօրինակված է",
+    passCopied: "Գաղտնաբառը կրկնօրինակված է",
+    joinedRoom: "Միացաք սենյակին։",
+    roomFull: "Այս սենյակն արդեն լրված է (10/10)",
+    roomNotFound: "Այդպիսի սենյակ չի գտնվել կամ խաղավարը միացված չէ։ Ստուգեք կոդը։",
+    leftRoom: "Դուրս եկաք սենյակից։ Կարող եք վերադառնալ նույն կոդով։",
+    waitingPlayers: "Սպասում ենք մյուս խաղացողներին...",
+    confirmEnd: "Ավարտե՞լ խաղը հիմա։",
+    you: "(Դուք)",
+    allSlots: "Բոլոր տեղերը զբաղված են!",
+    canStart: "Կարող եք սկսել հենց հիմա, կամ սպասել ևս {n} խաղացողի (առավելագույնը 10)...",
+    night: "Գիշեր",
+    day: "Ցերեկ",
+    dayNum: "Օր",
+    blackTeam: "ՍԵՎ ԹԻՄ",
+    redTeam: "ԿԱՐՄԻՐ ԹԻՄ",
+    noVotesYet: "Ընտրեք զոհ ձեր թիմի հետ։",
+    votedFor: "Դուք ընտրեցիք {name}-ին։ Սպասվում է մյուսների որոշումը ({a}/{b})...",
+    result: "Արդյունք՝ {name} → {answer}",
+    checkSent: "Ստուգումն ուղարկված է։",
+    noKill: "🌙 Այս գիշեր ոչ ոք չի սպանվել։",
+    killedNight: "☠️ {name} սպանվել է գիշերը։",
+    cannotVote: "Դուք հեռացված եք և չեք կարող քվեարկել։",
+    youVoted: "Դուք քվեարկեցիք։ ({a}/{b})",
+    chooseEliminate: "Ընտրեք ում ուզում եք հեռացնել։",
+    votes: "ձայն",
+    lang: "🌐 Լեզու",
+    offlineTitle: "Ինտերնետ կապ չկա",
+    offlineMsg: "Գովազդը ցուցադրելու համար միացրեք Wi-Fi-ը կամ բջջային ինտերնետը։",
+    retry: "Փորձել կրկին",
+    roles: {
+      citizen: {name:"Խաղաղ բնակիչ", desc:"Դուք քաղաքի խաղաղ բնակիչ եք։ Ձեր նպատակն է հայտնաբերել և հեռացնել մաֆիային ցերեկային քվեարկությամբ։"},
+      mafia:   {name:"Մաֆիա", desc:"Դուք մաֆիայի անդամ եք։ Գիշերը դոնի հետ միասին ընտրեք զոհ։ Թաքցրեք ձեր դերը ցերեկը։"},
+      sheriff: {name:"Շերիֆ", desc:"Դուք շերիֆն եք։ Ամեն գիշեր կարող եք ստուգել մեկ խաղացողի և իմանալ՝ նա Սև է, թե Կարմիր։"},
+      don:     {name:"Դոն", desc:"Դուք մաֆիայի դոնն եք։ Դուք էլ եք ընտրում զոհին գիշերը, մաֆիաների հետ միասին։"}
+    },
+    black: "Սև",
+    red: "Կարմիր"
+  },
+  ru: {
+    title: "МАФИЯ | Игра в реальном времени",
+    brandSub: "Realtime Multiplayer",
+    loading: "Подключаемся к серверу...",
+    welcome: "Добро пожаловать",
+    welcomeHint: "Создайте комнату или присоединитесь к друзьям",
+    yourName: "Ваше имя",
+    namePlaceholder: "напр. Арам",
+    createGame: "🎲 Создать игру",
+    or: "или",
+    roomCode: "Код комнаты",
+    roomCodePlaceholder: "напр. A1B2C3",
+    friendPassword: "Пароль друга (быстрый вход)",
+    passwordPlaceholder: "напр. 4821",
+    joinGame: "🚪 Войти в игру",
+    activeRooms: "🎮 Активные комнаты",
+    searchingRooms: "Ищем активные комнаты...",
+    noActiveRooms: "Сейчас нет активных комнат",
+    footer: "10 игроков · Синхронизация в реальном времени · Supabase Realtime",
+    lobby: "Лобби",
+    roomCodeLabel: "Код комнаты",
+    copy: "📋 Копировать",
+    friendPassLabel: "🔑 Пароль друга (быстрый вход)",
+    friendPassHint: "С этим паролем любой друг может войти в вашу комнату. Делитесь только с доверенными людьми.",
+    players: "👥 Игроки",
+    hostControls: "👑 Управление ведущего",
+    startGame: "▶️ Начать игру",
+    waitingHost: "Ждём, пока ведущий начнёт игру...",
+    yourRole: "Ваша роль",
+    tapCard: "Нажмите на карту, чтобы открыть",
+    continue: "Продолжить →",
+    eliminated: "Вы выбыли из игры",
+    eliminatedHint: "Вы больше не можете голосовать или действовать, но можете следить за игрой.",
+    citySleeps: "Город спит...",
+    mafiaActs: "Мафия и шериф действуют в тени.",
+    chooseVictim: "⚫ Выберите жертву",
+    chooseCheck: "⭐ Выберите игрока для проверки",
+    nightResult: "📜 Итог ночи",
+    voting: "🗳️ Голосование",
+    gameLog: "📜 Ход игры",
+    eliminatedList: "☠️ Выбывшие",
+    nobodyYet: "Пока никого",
+    goNight: "🌙 Перейти к ночи",
+    goDay: "☀️ Перейти к дню",
+    endGame: "⏹️ Закончить игру",
+    win: "Победа!",
+    redWon: "Красные победили!",
+    blackWon: "Мафия победила!",
+    redWonSub: "Город очищен от мафии.",
+    blackWonSub: "Мафия взяла город под контроль.",
+    gameEnded: "Игра окончена",
+    hostEnded: "Ведущий остановил игру.",
+    replaySame: "🔁 Играть снова тем же составом",
+    newGame: "🔄 Новая игра",
+    chat: "💬 Чат",
+    roomChat: "💬 Чат комнаты",
+    chatPlaceholder: "Напишите сообщение...",
+    myNotes: "📝 Мои заметки",
+    notesTitle: "📝 Мои наблюдения",
+    notesPlaceholder: "Пишите здесь свои заметки... (видно только вам)",
+    close: "Закрыть",
+    logout: "🚪 Выйти",
+    micHint: "Удерживайте, чтобы говорить",
+    enterName: "Введите ваше имя",
+    enterRoomCode: "Введите код комнаты",
+    wrongPassword: "Неверный пароль или комната больше не активна.",
+    codeCopied: "Код скопирован",
+    linkCopied: "Ссылка скопирована",
+    passCopied: "Пароль скопирован",
+    joinedRoom: "Вы вошли в комнату.",
+    roomFull: "Эта комната уже заполнена (10/10)",
+    roomNotFound: "Комната не найдена или ведущий не в сети. Проверьте код.",
+    leftRoom: "Вы вышли из комнаты. Можете вернуться с тем же кодом.",
+    waitingPlayers: "Ждём остальных игроков...",
+    confirmEnd: "Закончить игру сейчас?",
+    you: "(Вы)",
+    allSlots: "Все места заняты!",
+    canStart: "Можете начать сейчас или подождать ещё {n} игроков (макс. 10)...",
+    night: "Ночь",
+    day: "День",
+    dayNum: "День",
+    blackTeam: "ЧЁРНАЯ КОМАНДА",
+    redTeam: "КРАСНАЯ КОМАНДА",
+    noVotesYet: "Выберите жертву вместе с командой.",
+    votedFor: "Вы выбрали {name}. Ждём решение остальных ({a}/{b})...",
+    result: "Результат: {name} → {answer}",
+    checkSent: "Проверка отправлена.",
+    noKill: "🌙 Этой ночью никто не был убит.",
+    killedNight: "☠️ {name} убит ночью.",
+    cannotVote: "Вы выбыли и не можете голосовать.",
+    youVoted: "Вы проголосовали. ({a}/{b})",
+    chooseEliminate: "Выберите, кого хотите исключить.",
+    votes: "голос.",
+    lang: "🌐 Язык",
+    offlineTitle: "Нет подключения к интернету",
+    offlineMsg: "Чтобы показать рекламу, включите Wi-Fi или мобильный интернет.",
+    retry: "Попробовать снова",
+    roles: {
+      citizen: {name:"Мирный житель", desc:"Вы мирный житель города. Ваша цель — найти и исключить мафию дневным голосованием."},
+      mafia:   {name:"Мафия", desc:"Вы член мафии. Ночью вместе с доном выбирайте жертву. Днём скрывайте свою роль."},
+      sheriff: {name:"Шериф", desc:"Вы шериф. Каждую ночь можете проверить одного игрока и узнать, Чёрный он или Красный."},
+      don:     {name:"Дон", desc:"Вы дон мафии. Ночью вместе с мафией выбираете жертву."}
+    },
+    black: "Чёрный",
+    red: "Красный"
+  },
+  en: {
+    title: "MAFIA | Real-time game",
+    brandSub: "Realtime Multiplayer",
+    loading: "Connecting to server...",
+    welcome: "Welcome",
+    welcomeHint: "Create a room or join your friends",
+    yourName: "Your name",
+    namePlaceholder: "e.g. Aram",
+    createGame: "🎲 Create game",
+    or: "or",
+    roomCode: "Room code",
+    roomCodePlaceholder: "e.g. A1B2C3",
+    friendPassword: "Friend password (quick join)",
+    passwordPlaceholder: "e.g. 4821",
+    joinGame: "🚪 Join game",
+    activeRooms: "🎮 Active rooms",
+    searchingRooms: "Looking for active rooms...",
+    noActiveRooms: "No active rooms right now",
+    footer: "10 players · Real-time sync · Supabase Realtime",
+    lobby: "Lobby",
+    roomCodeLabel: "Room code",
+    copy: "📋 Copy",
+    friendPassLabel: "🔑 Friend password (quick join)",
+    friendPassHint: "With this password any friend can enter your room. Share only with people you trust.",
+    players: "👥 Players",
+    hostControls: "👑 Host controls",
+    startGame: "▶️ Start game",
+    waitingHost: "Waiting for the host to start the game...",
+    yourRole: "Your role",
+    tapCard: "Tap the card to reveal",
+    continue: "Continue →",
+    eliminated: "You have been eliminated",
+    eliminatedHint: "You can no longer vote or act, but you can still watch the game.",
+    citySleeps: "The city is asleep...",
+    mafiaActs: "The mafia and the sheriff act in the shadows.",
+    chooseVictim: "⚫ Choose the victim",
+    chooseCheck: "⭐ Choose a player to check",
+    nightResult: "📜 Night result",
+    voting: "🗳️ Voting",
+    gameLog: "📜 Game log",
+    eliminatedList: "☠️ Eliminated",
+    nobodyYet: "Nobody yet",
+    goNight: "🌙 Go to Night",
+    goDay: "☀️ Go to Day",
+    endGame: "⏹️ End game",
+    win: "Victory!",
+    redWon: "The reds won!",
+    blackWon: "The mafia won!",
+    redWonSub: "The city is clear of mafia.",
+    blackWonSub: "The mafia took control of the city.",
+    gameEnded: "Game over",
+    hostEnded: "The host ended the game.",
+    replaySame: "🔁 Replay with same players",
+    newGame: "🔄 New game",
+    chat: "💬 Chat",
+    roomChat: "💬 Room chat",
+    chatPlaceholder: "Type a message...",
+    myNotes: "📝 My notes",
+    notesTitle: "📝 My observations",
+    notesPlaceholder: "Write your notes here... (visible only to you)",
+    close: "Close",
+    logout: "🚪 Log out",
+    micHint: "Hold to talk",
+    enterName: "Enter your name",
+    enterRoomCode: "Enter the room code",
+    wrongPassword: "Wrong password or the room is no longer active.",
+    codeCopied: "Code copied",
+    linkCopied: "Link copied",
+    passCopied: "Password copied",
+    joinedRoom: "Joined the room.",
+    roomFull: "This room is full (10/10)",
+    roomNotFound: "Room not found or the host is offline. Check the code.",
+    leftRoom: "You left the room. You can rejoin with the same code.",
+    waitingPlayers: "Waiting for other players...",
+    confirmEnd: "End the game now?",
+    you: "(You)",
+    allSlots: "All seats are taken!",
+    canStart: "You can start now, or wait for {n} more players (max 10)...",
+    night: "Night",
+    day: "Day",
+    dayNum: "Day",
+    blackTeam: "BLACK TEAM",
+    redTeam: "RED TEAM",
+    noVotesYet: "Choose a victim with your team.",
+    votedFor: "You chose {name}. Waiting for others ({a}/{b})...",
+    result: "Result: {name} → {answer}",
+    checkSent: "Check sent.",
+    noKill: "🌙 Nobody was killed this night.",
+    killedNight: "☠️ {name} was killed at night.",
+    cannotVote: "You are eliminated and cannot vote.",
+    youVoted: "You voted. ({a}/{b})",
+    chooseEliminate: "Choose who to eliminate.",
+    votes: "votes",
+    lang: "🌐 Language",
+    offlineTitle: "No internet connection",
+    offlineMsg: "To show ads, please turn on Wi-Fi or mobile data.",
+    retry: "Try again",
+    roles: {
+      citizen: {name:"Citizen", desc:"You are a peaceful citizen. Your goal is to find and eliminate the mafia by day voting."},
+      mafia:   {name:"Mafia", desc:"You are a mafia member. At night choose a victim with the don. Hide your role during the day."},
+      sheriff: {name:"Sheriff", desc:"You are the sheriff. Each night you may check one player and learn if they are Black or Red."},
+      don:     {name:"Don", desc:"You are the mafia don. At night you choose the victim together with the mafia."}
+    },
+    black: "Black",
+    red: "Red"
+  }
 };
+function t(key, vars){
+  const pack = translations[currentLang] || translations.hy;
+  let s = pack[key];
+  if(s === undefined) s = (translations.hy[key] !== undefined ? translations.hy[key] : key);
+  if(vars && typeof s === 'string'){
+    Object.keys(vars).forEach(k=>{ s = s.replace(new RegExp('\\{'+k+'\\}','g'), vars[k]); });
+  }
+  return s;
+}
+function roleInfo(roleKey){
+  const pack = translations[currentLang] || translations.hy;
+  const r = (pack.roles && pack.roles[roleKey]) || (translations.hy.roles[roleKey]) || {name:roleKey, desc:''};
+  const icons = {citizen:"🔴", mafia:"⚫", sheriff:"⭐", don:"👑"};
+  const teams = {citizen:"red", mafia:"black", sheriff:"red", don:"black"};
+  return {icon: icons[roleKey]||"❔", name: r.name, desc: r.desc, team: teams[roleKey]||"red"};
+}
+const ROLE_DEF = {
+  citizen: {icon:"🔴", name:"Խաղաղ բնակիչ", team:"red", desc:""},
+  mafia:   {icon:"⚫", name:"Մաֆիա", team:"black", desc:""},
+  sheriff: {icon:"⭐", name:"Շերիֆ", team:"red", desc:""},
+  don:     {icon:"👑", name:"Դոն", team:"black", desc:""}
+};
+function refreshRoleDef(){
+  ["citizen","mafia","sheriff","don"].forEach(k=>{
+    const ri = roleInfo(k);
+    ROLE_DEF[k] = {icon:ri.icon, name:ri.name, team:ri.team, desc:ri.desc};
+  });
+}
+refreshRoleDef();
 function roleComposition(n){
   // Scales gracefully from 1 to 10 players.
   // At n=10 this reproduces the original 6 citizen / 2 mafia / 1 sheriff / 1 don split.
@@ -1090,7 +1490,7 @@ function handleIncomingAction(payload){
     if(game.phase!=='night') return;
     const target = game.players.find(p=>p.id===data.targetId);
     if(!target) return;
-    const answer = target.role==='mafia' || target.role==='don' ? "Սև" : "Կարմիր";
+    const answer = target.role==='mafia' || target.role==='don' ? t('black') : t('red');
     game.nightActions.sheriffTarget = data.targetId;
     game.nightActions.sheriffResultFor = from;
     game.nightActions.sheriffResultAnswer = answer;
@@ -1274,34 +1674,13 @@ function subscriptionActive(){
 }
 
 function requireSubscription(kind, proceedFn){
-  const name = $("landingName").value.trim();
-  if(!name){ toast("Գրեք ձեր անունը"); return; }
-  if(kind==='join'){
-    const code = $("landingRoomCode").value.trim();
-    if(!code || code.length<4){ toast("Մուտքագրեք սենյակի կոդը"); return; }
-  }
-  if(subscriptionActive()){ proceedFn(); return; }
-  pendingAction = proceedFn;
-  if(currentRequestId){
-    openPaymentChatForExisting();
-  } else {
-    openPaywall();
-  }
+  // Game is fully free — always proceed
+  if(typeof proceedFn === 'function') proceedFn();
 }
 
-function openPaywall(){
-  const sub = $("paywallSubtitle");
-  if(expiredPlanInfo){
-    const planTxt = planLabel(expiredPlanInfo.plan);
-    const dateTxt = new Date(expiredPlanInfo.expiresAt).toLocaleDateString('hy-AM', {day:'2-digit', month:'2-digit', year:'numeric'});
-    sub.innerHTML = `⏳ Ձեր <b>${planTxt}</b> փաթեթն ավարտվել է (${dateTxt})։ Խնդրում ենք նորոգել՝ խաղը շարունակելու համար։`;
-  } else {
-    sub.textContent = 'Այս գործողության համար անհրաժեշտ է ակտիվ բաժանորդագրություն';
-  }
-  $("paywallOverlay").classList.add('show');
-}
-function closePaywall(){ $("paywallOverlay").classList.remove('show'); }
-$("btnClosePaywall").addEventListener('click', closePaywall);
+function openPaywall(){ /* paywall disabled — game is free */ }
+function closePaywall(){ const el=$("paywallOverlay"); if(el) el.classList.remove('show'); }
+if($("btnClosePaywall")) $("btnClosePaywall").addEventListener('click', closePaywall);
 
 document.querySelectorAll('.plan-card').forEach(el=>{
   el.addEventListener('click', ()=>{
@@ -1488,7 +1867,7 @@ async function loadSubscriptionState(){
 /* ===================== CREATE / JOIN FLOWS ===================== */
 function performCreateGame(){
   const name = $("landingName").value.trim();
-  if(!name){ toast("Գրեք ձեր անունը"); return; }
+  if(!name){ toast(t('enterName')); return; }
   myName=name; sessionStorage.setItem('mafia_myName', name);
   isHost = true;
   const code = genRoomCode();
@@ -1506,13 +1885,13 @@ function performCreateGame(){
       .then(({error})=>{ if(error) console.error('active_rooms upsert failed', error); });
   }
 }
-$("btnCreateGame").addEventListener('click', ()=>{ requireSubscription('create', performCreateGame); });
+$("btnCreateGame").addEventListener('click', ()=>{ performCreateGame(); });
 
 function performJoinGame(){
   const name = $("landingName").value.trim();
   const code = $("landingRoomCode").value.trim().toUpperCase();
-  if(!name){ toast("Գրեք ձեր անունը"); return; }
-  if(!code || code.length<4){ toast("Մուտքագրեք սենյակի կոդը"); return; }
+  if(!name){ toast(t('enterName')); return; }
+  if(!code || code.length<4){ toast(t('enterRoomCode')); return; }
   myName=name; sessionStorage.setItem('mafia_myName', name);
   isHost=false;
   game = null;
@@ -1531,7 +1910,7 @@ function performJoinGame(){
         clearInterval(checkInterval); clearInterval(pingRetry);
         btn.disabled=false; btn.textContent=originalText;
         if(game.players.length >= MAX_PLAYERS && !game.players.find(p=>p.id===myId)){
-          toast("Այս սենյակն արդեն լրված է (10/10)");
+          toast(t('roomFull'));
           disconnectRoom();
           return;
         }
@@ -1541,7 +1920,7 @@ function performJoinGame(){
         if(myEntry && myEntry.isHost){ isHost = true; }
         showRoomUI();
         render();
-        toast("Միացաք սենյակին։");
+        toast(t('joinedRoom'));
       } else if(Date.now()-waitStart > 4000){
         clearInterval(checkInterval); clearInterval(pingRetry);
         btn.disabled=false; btn.textContent=originalText;
@@ -1563,7 +1942,7 @@ function performJoinGame(){
             return;
           }catch(e){ /* fall through to failure */ }
         }
-        toast("Այդպիսի սենյակ չի գտնվել կամ խաղավարը միացված չէ։ Ստուգեք կոդը։");
+        toast(t('roomNotFound'));
         disconnectRoom();
       }
     }, 200);
@@ -1573,20 +1952,20 @@ async function attemptJoinGame(){
   const name = $("landingName").value.trim();
   const code = $("landingRoomCode").value.trim().toUpperCase();
   const pass = $("landingRoomPassword").value.trim();
-  if(!name){ toast("Գրեք ձեր անունը"); return; }
-  if(!code || code.length<4){ toast("Մուտքագրեք սենյակի կոդը"); return; }
+  if(!name){ toast(t('enterName')); return; }
+  if(!code || code.length<4){ toast(t('enterRoomCode')); return; }
 
   if(pass && sb){
     try{
       const { data, error } = await sb.from('active_rooms').select('password').eq('room_code', code).maybeSingle();
       if(!error && data && data.password && data.password === pass){
-        performJoinGame(); // correct friend password → free entry, no subscription needed
+        performJoinGame();
         return;
       }
-      toast("Գաղտնաբառը սխալ է կամ սենյակն այլևս ակտիվ չէ։ Փորձում ենք սովորական մուտքով...");
+      toast(t('wrongPassword'));
     }catch(e){ console.error('active_rooms lookup failed', e); }
   }
-  requireSubscription('join', performJoinGame);
+  performJoinGame();
 }
 $("btnJoinGame").addEventListener('click', attemptJoinGame);
 
@@ -1614,7 +1993,7 @@ function performLogout(){
   showScreen("screen-landing");
   hideRoomUI();
   $("landingRoomCode").value = leftCode || '';
-  toast("Դուրս եկաք սենյակից։ Կարող եք վերադառնալ նույն կոդով։");
+  toast(t('leftRoom'));
 }
 $("logoutBtn").addEventListener('click', performLogout);
 
@@ -1637,13 +2016,13 @@ function hideRoomUI(){
 }
 
 $("btnCopyCode").addEventListener('click', ()=>{
-  navigator.clipboard.writeText(roomCode).then(()=>toast("Կոդը կրկնօրինակված է"));
+  navigator.clipboard.writeText(roomCode).then(()=>toast(t('codeCopied')));
 });
 $("btnCopyLink").addEventListener('click', ()=>{
-  navigator.clipboard.writeText($("lobbyLink").value).then(()=>toast("Հղումը կրկնօրինակված է"));
+  navigator.clipboard.writeText($("lobbyLink").value).then(()=>toast(t('linkCopied')));
 });
 $("btnCopyPassword").addEventListener('click', ()=>{
-  navigator.clipboard.writeText(game && game.password ? game.password : '').then(()=>toast("Գաղտնաբառը կրկնօրինակված է"));
+  navigator.clipboard.writeText(game && game.password ? game.password : '').then(()=>toast(t('passCopied')));
 });
 
 $("btnStartGame").addEventListener('click', ()=>{
@@ -1676,13 +2055,13 @@ function render(){
     $("playerGrid").innerHTML = game.players.map(p=>`
       <div class="player-chip ${p.id===myId?'you':''} ${p.isHost?'host-chip':''}">
         <div class="av">${initials(p.name)}</div>
-        <div>${escapeHtml(p.name)}${p.id===myId?' (Դուք)':''}</div>
+        <div>${escapeHtml(p.name)}${p.id===myId?' '+t('you'):''}</div>
       </div>
     `).join('');
     const remaining = MAX_PLAYERS - game.players.length;
     $("slotsLabel").textContent = game.players.length >= MAX_PLAYERS
-      ? "Բոլոր տեղերը զբաղված են!"
-      : `Կարող եք սկսել հենց հիմա, կամ սպասել ևս ${remaining} խաղացողի (առավելագույնը 10)...`;
+      ? t('allSlots')
+      : t('canStart', {n: remaining});
     const iAmHost = myPlayer && myPlayer.isHost;
     $("hostOnlyLobby").style.display = iAmHost ? 'block':'none';
     $("waitingForHostMsg").style.display = iAmHost ? 'none':'block';
@@ -1702,11 +2081,11 @@ function render(){
   if(game.phase==='reveal'){
     showScreen("screen-role");
     if(myPlayer && myPlayer.role && !roleCardShown){
-      const rd = ROLE_DEF[myPlayer.role];
+      const rd = roleInfo(myPlayer.role);
       $("roleIcon").textContent = rd.icon;
       $("roleName").textContent = rd.name;
       $("roleDesc").textContent = rd.desc;
-      $("roleTeamTag").textContent = rd.team==='black' ? "ՍԵՎ ԹԻՄ" : "ԿԱՐՄԻՐ ԹԻՄ";
+      $("roleTeamTag").textContent = rd.team==='black' ? t('blackTeam') : t('redTeam');
       $("roleTeamTag").className = "role-team-tag "+rd.team;
     }
     return;
@@ -1722,8 +2101,8 @@ function render(){
     }
     $("phaseIcon").textContent = game.phase==='night' ? "🌙" : "☀️";
     $("phaseLabel").textContent = game.phase==='night'
-      ? `Գիշեր · Օր ${game.dayNumber}`
-      : `Ցերեկ · Օր ${game.dayNumber}`;
+      ? `${t('night')} · ${t('dayNum')} ${game.dayNumber}`
+      : `${t('day')} · ${t('dayNum')} ${game.dayNumber}`;
 
     const alive = amIAlive();
     $("eliminatedBanner").style.display = alive ? 'none' : 'block';
@@ -1756,13 +2135,15 @@ function render(){
     const dead = game.players.filter(p=>!p.alive);
     $("deadStrip").innerHTML = dead.length
       ? dead.map(p=>`<span>☠️ ${escapeHtml(p.name)}</span>`).join('')
-      : '<span class="muted" style="background:none;border:none;">Դեռ ոչ ոք</span>';
+      : `<span class="muted" style="background:none;border:none;">${t('nobodyYet')}</span>`;
 
     // host controls
     const iAmHost = myPlayer && myPlayer.isHost;
     $("hostOnlyGame").style.display = iAmHost ? 'block' : 'none';
     if(iAmHost){
-      $("btnTogglePhase").textContent = game.phase==='night' ? "☀️ Անցնել Ցերեկվա" : "🌙 Անցնել Գիշերվա";
+      $("btnTogglePhase").textContent = game.phase==='night' ? t('goDay') : t('goNight');
+      $("btnEndGame").textContent = t('endGame');
+      const hostTagG = document.querySelector('#hostOnlyGame .tag'); if(hostTagG) hostTagG.textContent = t('hostControls');
     }
     return;
   }
@@ -1774,28 +2155,34 @@ function render(){
     if(game.winner){
       const redWin = game.winner==='red';
       $("winIcon").textContent = redWin ? "🔴" : "⚫";
-      $("winTitle").textContent = redWin ? "Կարմիրները հաղթեցին!" : "Մաֆիան հաղթեց!";
-      $("winSubtitle").textContent = redWin ? "Քաղաքը մաքրվեց մաֆիայից։" : "Մաֆիան վերահսկողության տակ վերցրեց քաղաքը։";
+      $("winTitle").textContent = redWin ? t('redWon') : t('blackWon');
+      $("winSubtitle").textContent = redWin ? t('redWonSub') : t('blackWonSub');
       $("finalRolesList").innerHTML = game.players.map(p=>{
-        const rd = ROLE_DEF[p.role] || {icon:'❔',name:'—'};
+        const rd = roleInfo(p.role);
         return `<div class="mrow"><span>${rd.icon} ${escapeHtml(p.name)}</span><span>${rd.name}${p.alive?'':' · ☠️'}</span></div>`;
       }).join('');
-      if(lastPhaseRendered!=='ended'){ sfx('win'); launchConfetti(); }
+      if(lastPhaseRendered!=='ended'){ sfx('win'); launchConfetti(); tryShowAdBreak('game-end'); }
     } else {
       $("winIcon").textContent = "⏹️";
-      $("winTitle").textContent = "Խաղն ավարտվեց";
-      $("winSubtitle").textContent = "Խաղավարը դադարեցրեց խաղը։";
+      $("winTitle").textContent = t('gameEnded');
+      $("winSubtitle").textContent = t('hostEnded');
       $("finalRolesList").innerHTML = '';
     }
     lastPhaseRendered='ended';
     const iAmHost = myPlayer && myPlayer.isHost;
     $("hostOnlyWin").style.display = iAmHost ? 'block':'none';
+    if(iAmHost){
+      $("btnReplaySame").textContent = t('replaySame');
+      $("btnNewGame").textContent = t('newGame');
+      const hostTagW = document.querySelector('#hostOnlyWin .tag'); if(hostTagW) hostTagW.textContent = t('hostControls');
+    }
     return;
   }
 }
 
 function renderMafiaView(){
   $("mafiaActionView").style.display='block';
+  const mafiaTitle = $("mafiaActionView").querySelector('.section-title'); if(mafiaTitle) mafiaTitle.textContent = t('chooseVictim');
   const targets = game.players.filter(p=>p.alive && p.role!=='mafia' && p.role!=='don');
   const myVote = game.nightActions.mafiaVotes[myId];
   const voteCounts = {};
@@ -1804,7 +2191,7 @@ function renderMafiaView(){
     <div class="target-row selectable ${myVote===p.id?'selected':''}" data-id="${p.id}">
       <div class="av">${initials(p.name)}</div>
       <div class="name">${escapeHtml(p.name)}</div>
-      ${voteCounts[p.id] ? `<div class="vote-count">${voteCounts[p.id]} ձայն</div>` : ''}
+      ${voteCounts[p.id] ? `<div class="vote-count">${voteCounts[p.id]} ${t('votes')}</div>` : ''}
     </div>
   `).join('');
   $("mafiaTargetList").querySelectorAll('.target-row').forEach(row=>{
@@ -1815,12 +2202,13 @@ function renderMafiaView(){
   });
   const teammatesAlive = game.players.filter(p=>p.alive && (p.role==='mafia'||p.role==='don')).length;
   $("mafiaVoteStatus").textContent = myVote
-    ? `Դուք ընտրեցիք ${game.players.find(p=>p.id===myVote)?.name}-ին։ Սպասվում է մյուսների որոշումը (${Object.keys(game.nightActions.mafiaVotes).length}/${teammatesAlive})...`
-    : "Ընտրեք զոհ ձեր թիմի հետ։";
+    ? t('votedFor', {name: game.players.find(p=>p.id===myVote)?.name || '', a: Object.keys(game.nightActions.mafiaVotes).length, b: teammatesAlive})
+    : t('noVotesYet');
 }
 
 function renderSheriffView(){
   $("sheriffActionView").style.display='block';
+  const shTitle = $("sheriffActionView").querySelector('.section-title'); if(shTitle) shTitle.textContent = t('chooseCheck');
   const targets = game.players.filter(p=>p.alive && p.id!==myId);
   const already = !!game.nightActions.sheriffTarget;
   $("sheriffTargetList").innerHTML = targets.map(p=>`
@@ -1839,17 +2227,17 @@ function renderSheriffView(){
     $("sheriffResultMsg").textContent = "";
   } else if(game.nightActions.sheriffResultFor===myId){
     const target = game.players.find(p=>p.id===game.nightActions.sheriffTarget);
-    $("sheriffResultMsg").textContent = `Արդյունք՝ ${target?.name} → ${game.nightActions.sheriffResultAnswer}`;
+    $("sheriffResultMsg").textContent = t('result', {name: target?.name || '', answer: game.nightActions.sheriffResultAnswer});
   } else {
-    $("sheriffResultMsg").textContent = "Ստուգումն ուղարկված է։";
+    $("sheriffResultMsg").textContent = t('checkSent');
   }
 }
 
 function renderDayView(){
   $("dayView").style.display='block';
   $("nightResultLog").innerHTML = game.lastNightDeaths.length
-    ? game.lastNightDeaths.map(n=>`<p>☠️ ${escapeHtml(n)} սպանվել է գիշերը։</p>`).join('')
-    : '<p>🌙 Այս գիշեր ոչ ոք չի սպանվել։</p>';
+    ? game.lastNightDeaths.map(n=>`<p>${t('killedNight', {name: escapeHtml(n)})}</p>`).join('')
+    : `<p>${t('noKill')}</p>`;
 
   const alive = game.players.filter(p=>p.alive);
   const myVote = game.dayVotes[myId];
@@ -1860,7 +2248,7 @@ function renderDayView(){
     <div class="target-row ${canVote && !myVote ? 'selectable':''} ${myVote===p.id?'selected':''}" data-id="${p.id}">
       <div class="av">${initials(p.name)}</div>
       <div class="name">${escapeHtml(p.name)}</div>
-      ${voteCounts[p.id] ? `<div class="vote-count">${voteCounts[p.id]} ձայն</div>` : ''}
+      ${voteCounts[p.id] ? `<div class="vote-count">${voteCounts[p.id]} ${t('votes')}</div>` : ''}
     </div>
   `).join('');
   if(canVote && !myVote){
@@ -1872,10 +2260,10 @@ function renderDayView(){
     });
   }
   $("dayVoteStatus").textContent = !canVote
-    ? "Դուք հեռացված եք և չեք կարող քվեարկել։"
+    ? t('cannotVote')
     : myVote
-      ? `Դուք քվեարկեցիք։ (${Object.keys(game.dayVotes).length}/${alive.length})`
-      : "Ընտրեք ում ուզում եք հեռացնել։";
+      ? t('youVoted', {a: Object.keys(game.dayVotes).length, b: alive.length})
+      : t('chooseEliminate');
 }
 
 function escapeHtml(str){
@@ -1894,13 +2282,13 @@ $("roleCard3d").addEventListener('click', ()=>{
 $("btnRoleContinue").addEventListener('click', ()=>{
   // client just waits — host auto-advances to night after a timer,
   // but if state already moved on, render() will pick it up.
-  toast("Սպասում ենք մյուս խաղացողներին...");
+  toast(t('waitingPlayers'));
 });
 
 /* ===================== HOST BUTTONS ===================== */
 $("btnTogglePhase").addEventListener('click', ()=> sendAction('toggle-phase', {}));
 $("btnEndGame").addEventListener('click', ()=>{
-  if(confirm("Ավարտե՞լ խաղը հիմա։")) sendAction('end-game', {});
+  if(confirm(t('confirmEnd'))) sendAction('end-game', {});
 });
 $("btnReplaySame").addEventListener('click', ()=> sendAction('replay-same', {}));
 $("btnNewGame").addEventListener('click', ()=>{
@@ -2012,7 +2400,7 @@ function renderActiveRooms(){
   if(!wrap) return;
   const codes = Object.keys(activeRooms);
   if(!codes.length){
-    wrap.innerHTML = '<p class="muted center-text" style="font-size:13px;">Ակտիվ սենյակներ չկան այս պահին</p>';
+    wrap.innerHTML = `<p class="muted center-text" style="font-size:13px;">${t('noActiveRooms')}</p>`;
     return;
   }
   wrap.innerHTML = codes.map(code=>{
@@ -2158,6 +2546,125 @@ $("micBtn").addEventListener('mouseleave', stopTalk);
 $("micBtn").addEventListener('touchstart', (e)=>{ e.preventDefault(); startTalk(); });
 $("micBtn").addEventListener('touchend', (e)=>{ e.preventDefault(); stopTalk(); });
 
+/* ===================== LANGUAGE UI ===================== */
+function applyTranslations(){
+  refreshRoleDef();
+  document.documentElement.lang = currentLang;
+  document.title = t('title');
+  const setTxt = (id, key) => { const el=$(id); if(el) el.textContent = t(key); };
+  const setPh = (id, key) => { const el=$(id); if(el) el.placeholder = t(key); };
+  setTxt('loadingText', 'loading');
+  const brandSub = document.querySelector('.brand .sub'); if(brandSub) brandSub.textContent = t('brandSub');
+  const h1 = document.querySelector('.brand h1'); if(h1) h1.textContent = currentLang==='en' ? 'MAFIA' : currentLang==='ru' ? 'МАФИЯ' : 'ՄԱՖԻԱ';
+  setTxt('langBtn', 'lang');
+  // Landing
+  const landH2 = document.querySelector('#screen-landing h2'); if(landH2) landH2.textContent = t('welcome');
+  const landP = document.querySelector('#screen-landing .muted.center-text'); if(landP) landP.textContent = t('welcomeHint');
+  const labels = document.querySelectorAll('#screen-landing .field-label');
+  if(labels[0]) labels[0].textContent = t('yourName');
+  if(labels[1]) labels[1].textContent = t('roomCode');
+  if(labels[2]) labels[2].textContent = t('friendPassword');
+  setPh('landingName', 'namePlaceholder');
+  setPh('landingRoomCode', 'roomCodePlaceholder');
+  setPh('landingRoomPassword', 'passwordPlaceholder');
+  setTxt('btnCreateGame', 'createGame');
+  setTxt('btnJoinGame', 'joinGame');
+  const div = document.querySelector('#screen-landing .divider'); if(div){ div.childNodes.forEach?.(n=>{}); div.textContent = t('or'); }
+  const actTitle = document.querySelector('#screen-landing .section-title'); if(actTitle) actTitle.textContent = t('activeRooms');
+  const foot = document.querySelector('#screen-landing footer.small'); if(foot) foot.textContent = t('footer');
+  // Lobby
+  const lobH2 = document.querySelector('#screen-lobby h2'); if(lobH2) lobH2.textContent = t('lobby');
+  setTxt('btnCopyCode', 'copy');
+  setTxt('btnCopyPassword', 'copy');
+  setTxt('btnStartGame', 'startGame');
+  setTxt('waitingForHostMsg', 'waitingHost');
+  const hostTag = document.querySelector('#hostOnlyLobby .tag'); if(hostTag) hostTag.textContent = t('hostControls');
+  // Role
+  const roleH2 = document.querySelector('#screen-role h2'); if(roleH2) roleH2.textContent = t('yourRole');
+  const roleP = document.querySelector('#screen-role .muted'); if(roleP) roleP.textContent = t('tapCard');
+  setTxt('btnRoleContinue', 'continue');
+  // Game
+  const elimStrong = document.querySelector('#eliminatedBanner strong'); if(elimStrong) elimStrong.textContent = t('eliminated');
+  const elimP = document.querySelector('#eliminatedBanner .muted'); if(elimP) elimP.textContent = t('eliminatedHint');
+  const sleepH = document.querySelector('#nightSleepView h3'); if(sleepH) sleepH.textContent = t('citySleeps');
+  const sleepP = document.querySelector('#nightSleepView .muted'); if(sleepP) sleepP.textContent = t('mafiaActs');
+  const titles = document.querySelectorAll('#screen-game .section-title');
+  // chat / notes / logout / mic
+  setTxt('logoutBtn', 'logout');
+  setTxt('micHint', 'micHint');
+  if($("micBtn")) $("micBtn").title = t('micHint');
+  const chatToggle = $("chatToggle"); if(chatToggle){ chatToggle.innerHTML = t('chat') + '<span class="badge-count" id="chatBadge">0</span>'; }
+  const chatTitle = document.querySelector('#chatPanel strong'); if(chatTitle) chatTitle.textContent = t('roomChat');
+  setPh('chatInput', 'chatPlaceholder');
+  setTxt('notesToggle', 'myNotes');
+  const notesTitle = document.querySelector('#notesPanel strong'); if(notesTitle) notesTitle.textContent = t('notesTitle');
+  setPh('notesArea', 'notesPlaceholder');
+  setTxt('btnCloseNotes', 'close');
+  // offline
+  setTxt('offlineTitle', 'offlineTitle');
+  setTxt('offlineMsg', 'offlineMsg');
+  setTxt('btnOfflineRetry', 'retry');
+  // lang menu active
+  document.querySelectorAll('#langMenu button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.lang === currentLang);
+  });
+  if(game) render();
+}
+function setLanguage(lang){
+  if(!translations[lang]) return;
+  currentLang = lang;
+  localStorage.setItem('mafia_lang', lang);
+  applyTranslations();
+  $("langMenu").classList.remove('show');
+}
+$("langBtn").addEventListener('click', (e)=>{
+  e.stopPropagation();
+  $("langMenu").classList.toggle('show');
+});
+document.querySelectorAll('#langMenu button').forEach(b=>{
+  b.addEventListener('click', ()=> setLanguage(b.dataset.lang));
+});
+document.addEventListener('click', ()=>{ const m=$("langMenu"); if(m) m.classList.remove('show'); });
+
+/* ===================== OFFLINE + ADS ===================== */
+function isOnline(){ return navigator.onLine !== false; }
+function showOfflinePopup(){
+  const el = $("offlineOverlay");
+  if(el) el.classList.add('show');
+}
+function hideOfflinePopup(){
+  const el = $("offlineOverlay");
+  if(el) el.classList.remove('show');
+}
+$("btnOfflineRetry").addEventListener('click', ()=>{
+  if(isOnline()){
+    hideOfflinePopup();
+    tryShowAdBreak('retry');
+  } else {
+    showOfflinePopup();
+  }
+});
+window.addEventListener('online', ()=>{ hideOfflinePopup(); });
+window.addEventListener('offline', ()=>{ /* popup only when an ad is requested */ });
+
+let lastAdAt = 0;
+function tryShowAdBreak(name){
+  if(typeof adBreak !== 'function') return;
+  if(!isOnline()){ showOfflinePopup(); return; }
+  const now = Date.now();
+  if(now - lastAdAt < 60000) return; // respect natural frequency, min ~60s
+  lastAdAt = now;
+  try{
+    adBreak({
+      type: 'browse',
+      name: name || 'natural-break',
+      beforeAd: ()=>{},
+      afterAd: ()=>{},
+      adBreakDone: ()=>{}
+    });
+  }catch(e){ console.warn('adBreak error', e); }
+}
+
 /* ===================== BOOT ===================== */
 (function boot(){
   let ok = false;
@@ -2166,12 +2673,13 @@ $("micBtn").addEventListener('touchend', (e)=>{ e.preventDefault(); stopTalk(); 
   }catch(e){
     console.error(e);
     $("configWarning").style.display='block';
-    $("configWarning").textContent = "⚠ Սխալ Supabase-ը միացնելիս։ Ստուգեք URL/key-երը։";
+    $("configWarning").textContent = "⚠ Error initializing Supabase. Check URL/keys.";
   }
   if(ok){
     try{ setupDirectory(); }catch(e){ console.error(e); }
     try{ loadSubscriptionState(); }catch(e){ console.error(e); }
   }
+  applyTranslations();
   setTimeout(()=>{
     $("loadingScreen").style.opacity='0';
     setTimeout(()=>$("loadingScreen").style.display='none', 500);
