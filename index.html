@@ -44,8 +44,12 @@
   window.adsbygoogle = window.adsbygoogle || [];
   var adBreak = adConfig = function(o){adsbygoogle.push(o);};
 </script>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2222%22%20fill%3D%22%230a0908%22/%3E%3Crect%20x%3D%223%22%20y%3D%223%22%20width%3D%2294%22%20height%3D%2294%22%20rx%3D%2220%22%20fill%3D%22none%22%20stroke%3D%22%23d4af37%22%20stroke-width%3D%223%22/%3E%3Ctext%20x%3D%2250%22%20y%3D%2270%22%20font-size%3D%2258%22%20text-anchor%3D%22middle%22%3E%F0%9F%8E%AD%3C/text%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20180%20180%22%3E%3Crect%20width%3D%22180%22%20height%3D%22180%22%20rx%3D%2240%22%20fill%3D%22%230a0908%22/%3E%3Crect%20x%3D%226%22%20y%3D%226%22%20width%3D%22168%22%20height%3D%22168%22%20rx%3D%2234%22%20fill%3D%22none%22%20stroke%3D%22%23d4af37%22%20stroke-width%3D%226%22/%3E%3Ctext%20x%3D%2290%22%20y%3D%22120%22%20font-size%3D%22100%22%20text-anchor%3D%22middle%22%3E%F0%9F%8E%AD%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Rubik:wght@400;500;600;700&family=Noto+Serif+Armenian:wght@500;600;700;900&family=Noto+Sans+Armenian:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
@@ -971,6 +975,13 @@ const translations = {
     howToHtml: "<p><b>1.</b> Ստեղծիր սենյակ կամ միացիր կոդով։</p><p><b>2.</b> Միայն <b>խաղավարը</b> կարող է սկսել խաղը։</p><p><b>3.</b> Յուրաքանչյուր խաղացող ստանում է դեր՝ բնակիչ, մաֆիա, շերիֆ կամ դոն։</p><p><b>4. Գիշեր.</b> Մաֆիան և դոնը միասին ընտրում են զոհ։ <b>Բոլոր սևերը</b> պետք է ընտրեն, որից հետո հնարավոր է անցնել ցերեկ։ Շերիֆը կարող է ստուգել մեկ խաղացողի։</p><p><b>5. Ցերեկ.</b> Բոլորը քննարկում են և քվեարկում՝ ում հեռացնել։</p><p><b>6.</b> Կարմիրները հաղթում են, երբ բոլոր սևերը դուրս են։ Սևերը՝ երբ իրենց թիվը հավասար է կամ ավելի է կարմիրներից։</p>",
     onlyHostStart: "Միայն խաղավարը կարող է սկսել խաղը։",
     waitBlacks: "Սպասեք՝ բոլոր սևերը դեռ չեն ընտրել զոհին։",
+    btnKill: "Սպանել",
+    btnCheck: "Ստուգել",
+    hostCannotLight: "Լույսը բացվում է ավտոմատ՝ երբ բոլոր սևերը որոշեն։ Խաղավարը չի կարող բացել լույսը։",
+    waitingReveal: "Սպասում ենք քարտերին ({a}/{b})",
+    openCard: "Բացել քարտը →",
+    stillHiding: "Դեռ չեն բացել՝",
+    allOpened: "Բոլորը բացեցին։ Գիշերը սկսվում է…",
     roles: {
       citizen: {name:"Խաղաղ բնակիչ", desc:"Դուք քաղաքի խաղաղ բնակիչ եք։ Ձեր նպատակն է հայտնաբերել և հեռացնել մաֆիային ցերեկային քվեարկությամբ։"},
       mafia:   {name:"Մաֆիա", desc:"Դուք մաֆիայի անդամ եք։ Գիշերը դոնի հետ միասին ընտրեք զոհ։ Թաքցրեք ձեր դերը ցերեկը։"},
@@ -1082,6 +1093,13 @@ const translations = {
     howToHtml: "<p><b>1.</b> Создайте комнату или войдите по коду.</p><p><b>2.</b> Только <b>ведущий</b> может начать игру.</p><p><b>3.</b> Каждый получает роль: житель, мафия, шериф или дон.</p><p><b>4. Ночь.</b> Мафия и дон выбирают жертву. <b>Все чёрные</b> должны проголосовать, только после этого можно перейти к дню. Шериф может проверить одного игрока.</p><p><b>5. День.</b> Все обсуждают и голосуют, кого исключить.</p><p><b>6.</b> Красные побеждают, когда все чёрные выбыли. Чёрные — когда их число равно или больше красных.</p>",
     onlyHostStart: "Только ведущий может начать игру.",
     waitBlacks: "Подождите: не все чёрные выбрали жертву.",
+    btnKill: "Убить",
+    btnCheck: "Проверить",
+    hostCannotLight: "Свет включается автоматически, когда все чёрные сделали выбор. Ведущий не может открыть день.",
+    waitingReveal: "Ждём карты ({a}/{b})",
+    openCard: "Открыть карту →",
+    stillHiding: "Ещё не открыли:",
+    allOpened: "Все открыли. Начинается ночь…",
     roles: {
       citizen: {name:"Мирный житель", desc:"Вы мирный житель города. Ваша цель — найти и исключить мафию дневным голосованием."},
       mafia:   {name:"Мафия", desc:"Вы член мафии. Ночью вместе с доном выбирайте жертву. Днём скрывайте свою роль."},
@@ -1193,6 +1211,13 @@ const translations = {
     howToHtml: "<p><b>1.</b> Create a room or join with a code.</p><p><b>2.</b> Only the <b>host</b> can start the game.</p><p><b>3.</b> Each player gets a role: citizen, mafia, sheriff, or don.</p><p><b>4. Night.</b> Mafia and don choose a victim. <b>All black players</b> must vote before day can begin. The sheriff may check one player.</p><p><b>5. Day.</b> Everyone discusses and votes who to eliminate.</p><p><b>6.</b> Reds win when all blacks are out. Blacks win when their number is equal to or greater than the reds.</p>",
     onlyHostStart: "Only the host can start the game.",
     waitBlacks: "Wait: not all black players have chosen a victim yet.",
+    btnKill: "Kill",
+    btnCheck: "Check",
+    hostCannotLight: "Day starts automatically when all black players have chosen. The host cannot open the light.",
+    waitingReveal: "Waiting for cards ({a}/{b})",
+    openCard: "Open card →",
+    stillHiding: "Still waiting:",
+    allOpened: "Everyone opened. Night is starting…",
     roles: {
       citizen: {name:"Citizen", desc:"You are a peaceful citizen. Your goal is to find and eliminate the mafia by day voting."},
       mafia:   {name:"Mafia", desc:"You are a mafia member. At night choose a victim with the don. Hide your role during the day."},
@@ -1300,15 +1325,17 @@ let game = null;
 function freshGame(code){
   return {
     roomCode: code,
-    password: null,        // 4-digit room password, free entry for friends who know it
+    password: null,
     phase: "lobby",        // lobby | reveal | night | day | ended
     dayNumber: 1,
-    players: [],           // {id,name,role,alive,isHost}
+    players: [],           // {id,name,role,alive,isHost,cardRevealed}
+    revealedIds: {},       // playerId -> true after they open role card
+    mustRevealIds: [],     // snapshot of player ids who must open card before first night
     nightActions: { mafiaVotes:{}, sheriffTarget:null, sheriffResultFor:null, sheriffResultAnswer:null },
-    dayVotes: {},           // voterId -> targetId
+    dayVotes: {},
     log: [],
     lastNightDeaths: [],
-    winner: null,           // 'red' | 'black' | null
+    winner: null,
     phaseStartedAt: null,
     phaseDurationMs: null
   };
@@ -1529,6 +1556,27 @@ function handleIncomingAction(payload){
     return;
   }
 
+  if(type==='role-revealed'){
+    if(game.phase!=='reveal') return;
+    if(!from) return;
+    if(!game.revealedIds) game.revealedIds = {};
+    game.revealedIds[from] = true;
+    const p = game.players.find(x=>x.id===from);
+    if(p) p.cardRevealed = true;
+    const waiting = playersStillHiding();
+    if(waiting.length){
+      pushLog("⏳ Քարտ դեռ չեն բացել՝ " + waiting.join(', '));
+    } else {
+      pushLog("✅ Բոլորը բացեցին քարտը։ Գիշերը սկսվում է։");
+    }
+    broadcastState();
+    // First night ONLY when every player has opened their card
+    if(allCardsRevealed()){
+      startNight();
+    }
+    return;
+  }
+
   if(type==='mafia-vote'){
     if(!actor || !actor.alive) return;
     const role = actor.role;
@@ -1537,6 +1585,11 @@ function handleIncomingAction(payload){
     game.nightActions.mafiaVotes[from] = data.targetId;
     checkMafiaConsensus();
     broadcastState();
+    // Light opens automatically only when ALL blacks have chosen
+    if(allBlacksVoted()){
+      checkMafiaConsensus();
+      resolveNightAndGoDay();
+    }
     return;
   }
 
@@ -1564,8 +1617,7 @@ function handleIncomingAction(payload){
   }
 
   if(type==='toggle-phase'){
-    if(from!==game.players.find(p=>p.isHost)?.id) return;
-    togglePhase();
+    // Host cannot open day/light. Phase changes are automatic.
     return;
   }
 
@@ -1675,17 +1727,50 @@ function endWithWinner(winner){
 }
 
 /* ===================== HOST: GAME FLOW ===================== */
+function allCardsRevealed(){
+  if(!game) return false;
+  if(!game.revealedIds) game.revealedIds = {};
+  // Use the snapshot of who must reveal at game start (not a changing list)
+  const must = (game.mustRevealIds && game.mustRevealIds.length)
+    ? game.mustRevealIds
+    : (game.players || []).map(p => p.id);
+  if(!must.length) return false;
+  // EVERY required player must have opened their card
+  return must.every(id => !!game.revealedIds[id]);
+}
+
+function playersStillHiding(){
+  if(!game) return [];
+  if(!game.revealedIds) game.revealedIds = {};
+  const must = (game.mustRevealIds && game.mustRevealIds.length)
+    ? game.mustRevealIds
+    : (game.players || []).map(p => p.id);
+  return must.filter(id => !game.revealedIds[id]).map(id => {
+    const pl = game.players.find(p => p.id === id);
+    return pl ? pl.name : '?';
+  });
+}
+
 function startGameRoles(){
   const roles = roleComposition(game.players.length);
-  game.players.forEach((p,i)=>{ p.role = roles[i]; p.alive=true; });
+  game.players.forEach((p,i)=>{ p.role = roles[i]; p.alive=true; p.cardRevealed=false; });
+  game.revealedIds = {};
+  // Lock the list of players who must open cards before first night
+  game.mustRevealIds = game.players.map(p => p.id);
   game.phase='reveal';
   game.dayNumber=1;
-  pushLog("🎲 Դերերը բաժանվեցին։ Խաղը սկսվում է։");
+  pushLog("🎲 Դերերը բաժանվեցին։ Բոլորը պետք է բացեն քարտը՝ գիշերից առաջ։");
   broadcastState();
-  setTimeout(()=>{ if(game && game.phase==='reveal'){ startNight(); } }, 4500);
+  // Night NEVER starts on a timer — only after allCardsRevealed()
 }
 
 function startNight(){
+  // Safety: first night cannot start until all role cards are opened
+  if(game.dayNumber === 1 && game.phase === 'reveal' && !allCardsRevealed()){
+    pushLog("⏳ Գիշերը չի սկսվում՝ բոլորը դեռ չեն բացել քարտը։");
+    broadcastState();
+    return;
+  }
   game.phase='night';
   game.nightActions = { mafiaVotes:{}, sheriffTarget:null, sheriffResultFor:null, sheriffResultAnswer:null, agreedVictim:null };
   game.phaseStartedAt = Date.now();
@@ -1716,16 +1801,9 @@ function resolveNightAndGoDay(){
 }
 
 function togglePhase(){
-  if(game.phase==='night'){
-    if(!allBlacksVoted()){
-      // Host cannot advance to day until all black players have chosen a victim
-      pushLog("⏳ Սպասում ենք, մինչև բոլոր սևերը ընտրեն զոհին։");
-      broadcastState();
-      return;
-    }
-    checkMafiaConsensus();
-    resolveNightAndGoDay();
-  } else if(game.phase==='day'){
+  // Host cannot open light. Day starts only when all blacks voted.
+  // Night starts after day votes resolve (or after all cards revealed).
+  if(game.phase==='day'){
     game.dayNumber++;
     startNight();
   }
@@ -2110,11 +2188,23 @@ window.addEventListener('DOMContentLoaded', ()=>{
 /* ===================== RENDER ===================== */
 let lastPhaseRendered = null;
 let roleCardShown = false;
+let lastRevealRoom = null;
 
 function render(){
   if(!game) return;
   const myPlayer = me();
   syncVoicePeers();
+  if(game.phase==='reveal'){
+    const key = (game.roomCode||'') + ':' + (game.dayNumber||1);
+    if(lastRevealRoom !== key){
+      lastRevealRoom = key;
+      if(!(game.revealedIds && game.revealedIds[myId])){
+        roleCardShown = false;
+        const card = $("roleCard3d");
+        if(card) card.classList.remove('flipped');
+      }
+    }
+  }
 
   // ---- LOBBY ----
   if(game.phase==='lobby'){
@@ -2140,13 +2230,52 @@ function render(){
   // ---- REVEAL ----
   if(game.phase==='reveal'){
     showScreen("screen-role");
-    if(myPlayer && myPlayer.role && !roleCardShown){
+    if(myPlayer && myPlayer.role){
       const rd = roleInfo(myPlayer.role);
       $("roleIcon").textContent = rd.icon;
       $("roleName").textContent = rd.name;
       $("roleDesc").textContent = rd.desc;
       $("roleTeamTag").textContent = rd.team==='black' ? t('blackTeam') : t('redTeam');
       $("roleTeamTag").className = "role-team-tag "+rd.team;
+    }
+    const iRevealed = !!(game.revealedIds && game.revealedIds[myId]);
+    if(iRevealed){
+      $("roleCard3d").classList.add('flipped');
+      roleCardShown = true;
+    } else if(game.phase==='reveal' && !roleCardShown){
+      // keep as is
+    }
+    const mustTotal = (game.mustRevealIds && game.mustRevealIds.length) ? game.mustRevealIds.length : game.players.length;
+    const revealedCount = game.revealedIds ? Object.keys(game.revealedIds).filter(id => {
+      const must = game.mustRevealIds || game.players.map(p=>p.id);
+      return must.includes(id);
+    }).length : 0;
+    const statusEl = $("btnRoleContinue");
+    if(statusEl){
+      statusEl.style.display = 'inline-block';
+      if(iRevealed){
+        statusEl.textContent = t('waitingReveal', {a: revealedCount, b: mustTotal});
+      } else {
+        statusEl.textContent = t('openCard');
+      }
+    }
+    // Show names still waiting under the button area via role desc helper
+    let waitMsg = $("revealWaitMsg");
+    if(!waitMsg){
+      waitMsg = document.createElement('p');
+      waitMsg.id = 'revealWaitMsg';
+      waitMsg.className = 'muted center-text';
+      waitMsg.style.marginTop = '12px';
+      const stage = document.querySelector('#screen-role .role-stage');
+      if(stage) stage.appendChild(waitMsg);
+    }
+    if(waitMsg){
+      const still = playersStillHiding();
+      if(still.length){
+        waitMsg.textContent = t('stillHiding') + ' ' + still.join(', ');
+      } else {
+        waitMsg.textContent = t('allOpened');
+      }
     }
     return;
   }
@@ -2201,18 +2330,10 @@ function render(){
     const iAmHost = myPlayer && myPlayer.isHost;
     $("hostOnlyGame").style.display = iAmHost ? 'block' : 'none';
     if(iAmHost){
-      $("btnTogglePhase").textContent = game.phase==='night' ? t('goDay') : t('goNight');
+      // Host cannot open light — hide phase toggle, only end game
+      $("btnTogglePhase").style.display = 'none';
       $("btnEndGame").textContent = t('endGame');
       const hostTagG = document.querySelector('#hostOnlyGame .tag'); if(hostTagG) hostTagG.textContent = t('hostControls');
-      if(game.phase==='night'){
-        const ready = allBlacksVoted();
-        $("btnTogglePhase").disabled = !ready;
-        if(!ready) $("btnTogglePhase").title = t('waitBlacks');
-        else $("btnTogglePhase").title = '';
-      } else {
-        $("btnTogglePhase").disabled = false;
-        $("btnTogglePhase").title = '';
-      }
     }
     return;
   }
@@ -2257,16 +2378,19 @@ function renderMafiaView(){
   const voteCounts = {};
   Object.values(game.nightActions.mafiaVotes).forEach(t=>voteCounts[t]=(voteCounts[t]||0)+1);
   $("mafiaTargetList").innerHTML = targets.map(p=>`
-    <div class="target-row selectable ${myVote===p.id?'selected':''}" data-id="${p.id}">
+    <div class="target-row ${myVote===p.id?'selected':''}" data-id="${p.id}" style="flex-wrap:wrap;">
       <div class="av">${initials(p.name)}</div>
-      <div class="name">${escapeHtml(p.name)}</div>
+      <div class="name" style="flex:1;">${escapeHtml(p.name)} <span style="opacity:.7;font-size:12px;">👤</span></div>
       ${voteCounts[p.id] ? `<div class="vote-count">${voteCounts[p.id]} ${t('votes')}</div>` : ''}
+      <button type="button" class="btn btn-primary kill-btn" data-id="${p.id}" style="width:100%;margin-top:6px;padding:10px;font-size:13px;" ${myVote?'disabled':''}>🗡 ${t('btnKill')}</button>
     </div>
   `).join('');
-  $("mafiaTargetList").querySelectorAll('.target-row').forEach(row=>{
-    row.addEventListener('click', ()=>{
+  $("mafiaTargetList").querySelectorAll('.kill-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      if(myVote) return;
       sfx('vote');
-      sendAction('mafia-vote', {targetId: row.dataset.id});
+      sendAction('mafia-vote', {targetId: btn.dataset.id});
     });
   });
   const teammatesAlive = game.players.filter(p=>p.alive && (p.role==='mafia'||p.role==='don')).length;
@@ -2281,16 +2405,18 @@ function renderSheriffView(){
   const targets = game.players.filter(p=>p.alive && p.id!==myId);
   const already = !!game.nightActions.sheriffTarget;
   $("sheriffTargetList").innerHTML = targets.map(p=>`
-    <div class="target-row ${already?'':'selectable'} ${game.nightActions.sheriffTarget===p.id?'selected':''}" data-id="${p.id}">
+    <div class="target-row ${game.nightActions.sheriffTarget===p.id?'selected':''}" data-id="${p.id}" style="flex-wrap:wrap;">
       <div class="av">${initials(p.name)}</div>
-      <div class="name">${escapeHtml(p.name)}</div>
+      <div class="name" style="flex:1;">${escapeHtml(p.name)} <span style="opacity:.7;font-size:12px;">👤</span></div>
+      ${already ? '' : `<button type="button" class="btn btn-gold check-btn" data-id="${p.id}" style="width:100%;margin-top:6px;padding:10px;font-size:13px;">🔍 ${t('btnCheck')}</button>`}
     </div>
   `).join('');
   if(!already){
-    $("sheriffTargetList").querySelectorAll('.target-row').forEach(row=>{
-      row.addEventListener('click', ()=>{
+    $("sheriffTargetList").querySelectorAll('.check-btn').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
         sfx('vote');
-        sendAction('sheriff-check', {targetId: row.dataset.id});
+        sendAction('sheriff-check', {targetId: btn.dataset.id});
       });
     });
     $("sheriffResultMsg").textContent = "";
@@ -2346,16 +2472,23 @@ $("roleCard3d").addEventListener('click', ()=>{
     sfx('flip');
     $("btnRoleContinue").style.display='inline-block';
     roleCardShown = true;
+    sendAction('role-revealed', {});
   }
 });
 $("btnRoleContinue").addEventListener('click', ()=>{
-  // client just waits — host auto-advances to night after a timer,
-  // but if state already moved on, render() will pick it up.
+  if(!roleCardShown){
+    $("roleCard3d").click();
+    return;
+  }
+  sendAction('role-revealed', {});
   toast(t('waitingPlayers'));
 });
 
 /* ===================== HOST BUTTONS ===================== */
-$("btnTogglePhase").addEventListener('click', ()=> sendAction('toggle-phase', {}));
+// Host cannot open day/light — button does nothing useful for night->day
+$("btnTogglePhase").addEventListener('click', ()=>{
+  toast(t('hostCannotLight'));
+});
 $("btnEndGame").addEventListener('click', ()=>{
   if(confirm(t('confirmEnd'))) sendAction('end-game', {});
 });
