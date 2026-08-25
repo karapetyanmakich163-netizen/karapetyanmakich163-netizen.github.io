@@ -982,6 +982,7 @@ const translations = {
     openCard: "Բացել քարտը →",
     stillHiding: "Դեռ չեն բացել՝",
     allOpened: "Բոլորը բացեցին։ Գիշերը սկսվում է…",
+    nightInSec: "Բոլորը տեսան դերը։ Գիշերը {n} վայրկյանից…",
     roles: {
       citizen: {name:"Խաղաղ բնակիչ", desc:"Դուք քաղաքի խաղաղ բնակիչ եք։ Ձեր նպատակն է հայտնաբերել և հեռացնել մաֆիային ցերեկային քվեարկությամբ։"},
       mafia:   {name:"Մաֆիա", desc:"Դուք մաֆիայի անդամ եք։ Գիշերը դոնի հետ միասին ընտրեք զոհ։ Թաքցրեք ձեր դերը ցերեկը։"},
@@ -1100,6 +1101,7 @@ const translations = {
     openCard: "Открыть карту →",
     stillHiding: "Ещё не открыли:",
     allOpened: "Все открыли. Начинается ночь…",
+    nightInSec: "Все увидели роль. Ночь через {n} сек…",
     roles: {
       citizen: {name:"Мирный житель", desc:"Вы мирный житель города. Ваша цель — найти и исключить мафию дневным голосованием."},
       mafia:   {name:"Мафия", desc:"Вы член мафии. Ночью вместе с доном выбирайте жертву. Днём скрывайте свою роль."},
@@ -1218,6 +1220,7 @@ const translations = {
     openCard: "Open card →",
     stillHiding: "Still waiting:",
     allOpened: "Everyone opened. Night is starting…",
+    nightInSec: "Everyone saw their role. Night in {n}s…",
     roles: {
       citizen: {name:"Citizen", desc:"You are a peaceful citizen. Your goal is to find and eliminate the mafia by day voting."},
       mafia:   {name:"Mafia", desc:"You are a mafia member. At night choose a victim with the don. Hide your role during the day."},
@@ -1331,6 +1334,7 @@ function freshGame(code){
     players: [],           // {id,name,role,alive,isHost,cardRevealed}
     revealedIds: {},       // playerId -> true after they open role card
     mustRevealIds: [],     // snapshot of player ids who must open card before first night
+    revealCountdownEndsAt: null, // when all cards open, night starts at this timestamp
     nightActions: { mafiaVotes:{}, sheriffTarget:null, sheriffResultFor:null, sheriffResultAnswer:null },
     dayVotes: {},
     log: [],
@@ -1566,13 +1570,26 @@ function handleIncomingAction(payload){
     const waiting = playersStillHiding();
     if(waiting.length){
       pushLog("⏳ Քարտ դեռ չեն բացել՝ " + waiting.join(', '));
+      game.revealCountdownEndsAt = null;
+      broadcastState();
+    } else if(allCardsRevealed()){
+      // Everyone opened — wait 10 seconds so all can read their role, then night
+      if(!game.revealCountdownEndsAt){
+        game.revealCountdownEndsAt = Date.now() + 10000;
+        pushLog("✅ Բոլորը բացեցին քարտը։ 10 վայրկյանից գիշեր…");
+        broadcastState();
+        const endsAt = game.revealCountdownEndsAt;
+        setTimeout(()=>{
+          if(!game || game.phase!=='reveal') return;
+          if(game.revealCountdownEndsAt !== endsAt) return; // cancelled/rescheduled
+          if(!allCardsRevealed()) return;
+          startNight();
+        }, 10000);
+      } else {
+        broadcastState();
+      }
     } else {
-      pushLog("✅ Բոլորը բացեցին քարտը։ Գիշերը սկսվում է։");
-    }
-    broadcastState();
-    // First night ONLY when every player has opened their card
-    if(allCardsRevealed()){
-      startNight();
+      broadcastState();
     }
     return;
   }
@@ -1757,6 +1774,7 @@ function startGameRoles(){
   game.revealedIds = {};
   // Lock the list of players who must open cards before first night
   game.mustRevealIds = game.players.map(p => p.id);
+  game.revealCountdownEndsAt = null;
   game.phase='reveal';
   game.dayNumber=1;
   pushLog("🎲 Դերերը բաժանվեցին։ Բոլորը պետք է բացեն քարտը՝ գիշերից առաջ։");
@@ -2273,9 +2291,17 @@ function render(){
       const still = playersStillHiding();
       if(still.length){
         waitMsg.textContent = t('stillHiding') + ' ' + still.join(', ');
+      } else if(game.revealCountdownEndsAt){
+        const sec = Math.max(0, Math.ceil((game.revealCountdownEndsAt - Date.now()) / 1000));
+        waitMsg.textContent = t('nightInSec', {n: sec});
       } else {
         waitMsg.textContent = t('allOpened');
       }
+    }
+    // refresh countdown display every second while waiting
+    if(game.revealCountdownEndsAt && game.phase==='reveal'){
+      clearTimeout(window._revealCdTimer);
+      window._revealCdTimer = setTimeout(()=>{ if(game && game.phase==='reveal') render(); }, 400);
     }
     return;
   }
