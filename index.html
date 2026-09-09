@@ -371,6 +371,11 @@ body.day-mode .lang-menu{background:var(--day-panel);}
 .offline-icons{font-size:48px; line-height:1.2; margin:8px 0 12px;}
 .offline-icons span{display:inline-block; margin:0 6px;}
 
+/* ============================= COOKIE CONSENT ============================= */
+#cookieOverlay{z-index:1000;}
+#cookieOverlay .card{max-width:420px; text-align:center;}
+.cookie-icons{font-size:44px; line-height:1.2; margin:4px 0 10px;}
+
 /* ============================= CHAT ============================= */
 #chatToggle{position:fixed; left:16px; bottom:76px; z-index:60; border-radius:50px; padding:12px 16px; font-size:13px; box-shadow:0 8px 24px rgba(0,0,0,.5); display:none;}
 #chatToggle .badge-count{background:var(--red); color:#fff; font-size:11px; font-weight:700; border-radius:10px; padding:1px 7px; margin-left:6px; display:none;}
@@ -485,6 +490,19 @@ body.day-mode .plan-card{background:rgba(0,0,0,.03);}
     <button type="button" data-lang="hy" class="active">🇦🇲 Հայերեն</button>
     <button type="button" data-lang="ru">🇷🇺 Русский</button>
     <button type="button" data-lang="en">🇬🇧 English</button>
+  </div>
+</div>
+
+<!-- Cookie consent — shown at the very start of the app -->
+<div class="overlay" id="cookieOverlay">
+  <div class="card">
+    <div class="cookie-icons">🍪</div>
+    <h2 id="cookieTitle" style="margin:0 0 8px;">Cookie-ների օգտագործում</h2>
+    <p class="muted" id="cookieMsg">Այս կայքն օգտագործում է cookie-ներ՝ խաղը ճիշտ աշխատացնելու և գովազդ ցուցադրելու համար։ Շարունակելով՝ դուք համաձայնում եք դրանց օգտագործմանը։</p>
+    <div class="btn-row" style="margin-top:18px;">
+      <button class="btn btn-primary" id="btnCookieAccept" style="flex:1;">✔️ Ընդունել</button>
+      <button class="btn btn-ghost" id="btnCookieDecline" style="flex:1;">Մերժել</button>
+    </div>
   </div>
 </div>
 
@@ -983,6 +1001,10 @@ const translations = {
     stillHiding: "Դեռ չեն բացել՝",
     allOpened: "Բոլորը բացեցին։ Գիշերը սկսվում է…",
     nightInSec: "Բոլորը տեսան դերը։ Գիշերը {n} վայրկյանից…",
+    cookieTitle: "🍪 Cookie-ների օգտագործում",
+    cookieMsg: "Այս կայքն օգտագործում է cookie-ներ՝ խաղը ճիշտ աշխատացնելու և գովազդ ցուցադրելու համար։ Շարունակելով՝ դուք համաձայնում եք դրանց օգտագործմանը։",
+    cookieAccept: "✔️ Ընդունել",
+    cookieDecline: "Մերժել",
     roles: {
       citizen: {name:"Խաղաղ բնակիչ", desc:"Դուք քաղաքի խաղաղ բնակիչ եք։ Ձեր նպատակն է հայտնաբերել և հեռացնել մաֆիային ցերեկային քվեարկությամբ։"},
       mafia:   {name:"Մաֆիա", desc:"Դուք մաֆիայի անդամ եք։ Գիշերը դոնի հետ միասին ընտրեք զոհ։ Թաքցրեք ձեր դերը ցերեկը։"},
@@ -1102,6 +1124,10 @@ const translations = {
     stillHiding: "Ещё не открыли:",
     allOpened: "Все открыли. Начинается ночь…",
     nightInSec: "Все увидели роль. Ночь через {n} сек…",
+    cookieTitle: "🍪 Использование cookie",
+    cookieMsg: "Этот сайт использует cookie для корректной работы игры и показа рекламы. Продолжая, вы соглашаетесь с их использованием.",
+    cookieAccept: "✔️ Принять",
+    cookieDecline: "Отклонить",
     roles: {
       citizen: {name:"Мирный житель", desc:"Вы мирный житель города. Ваша цель — найти и исключить мафию дневным голосованием."},
       mafia:   {name:"Мафия", desc:"Вы член мафии. Ночью вместе с доном выбирайте жертву. Днём скрывайте свою роль."},
@@ -1221,6 +1247,10 @@ const translations = {
     stillHiding: "Still waiting:",
     allOpened: "Everyone opened. Night is starting…",
     nightInSec: "Everyone saw their role. Night in {n}s…",
+    cookieTitle: "🍪 Use of cookies",
+    cookieMsg: "This site uses cookies to run the game properly and to show ads. By continuing, you agree to their use.",
+    cookieAccept: "✔️ Accept",
+    cookieDecline: "Decline",
     roles: {
       citizen: {name:"Citizen", desc:"You are a peaceful citizen. Your goal is to find and eliminate the mafia by day voting."},
       mafia:   {name:"Mafia", desc:"You are a mafia member. At night choose a victim with the don. Hide your role during the day."},
@@ -2569,6 +2599,22 @@ $("notesArea").addEventListener('input', ()=>{
   sessionStorage.setItem(notesKey(), $("notesArea").value);
 });
 
+/* ===================== COOKIE CONSENT ===================== */
+function checkCookieConsent(){
+  const consent = localStorage.getItem('mafia_cookie_consent');
+  if(!consent){
+    const el = $("cookieOverlay");
+    if(el) el.classList.add('show');
+  }
+}
+function setCookieConsent(value){
+  localStorage.setItem('mafia_cookie_consent', value);
+  const el = $("cookieOverlay");
+  if(el) el.classList.remove('show');
+}
+if($("btnCookieAccept")) $("btnCookieAccept").addEventListener('click', ()=> setCookieConsent('accepted'));
+if($("btnCookieDecline")) $("btnCookieDecline").addEventListener('click', ()=> setCookieConsent('declined'));
+
 /* ===================== SAFETY NET ===================== */
 function revealLandingAfterCrash(detail){
   const ls = document.getElementById('loadingScreen');
@@ -2833,6 +2879,11 @@ function applyTranslations(){
   setTxt('offlineTitle', 'offlineTitle');
   setTxt('offlineMsg', 'offlineMsg');
   setTxt('btnOfflineRetry', 'retry');
+  // cookie consent
+  setTxt('cookieTitle', 'cookieTitle');
+  setTxt('cookieMsg', 'cookieMsg');
+  setTxt('btnCookieAccept', 'cookieAccept');
+  setTxt('btnCookieDecline', 'cookieDecline');
   // lang menu active
   document.querySelectorAll('#langMenu button').forEach(b=>{
     b.classList.toggle('active', b.dataset.lang === currentLang);
@@ -2902,6 +2953,8 @@ function tryShowAdBreak(name){
 
 /* ===================== BOOT ===================== */
 (function boot(){
+  // Cookie consent shows first, above everything else — before any other init.
+  checkCookieConsent();
   let ok = false;
   try{
     ok = initSupabase();
